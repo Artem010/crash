@@ -345,9 +345,8 @@
 
 
 
-    async function update(){
+    let update = ()=>{
       if(gameActive){
-        setTimeout(()=>{update()},100)
 
 
         // endGame
@@ -361,7 +360,7 @@
           }
 
           addHistoryText()
-
+          socket.emit('end',true)
           setTimeout(()=>{timer()},2000)
 
         }else{
@@ -382,7 +381,7 @@
           plot.draw()
         }
 
-
+      setTimeout(()=>{update()},100)
       }
     }
 
@@ -413,7 +412,7 @@
 
     }
 
-    let tick = ()=>{
+    tick = ()=>{
       if(gameActive){
         if(timeOnStart >= Number(autoStop) && statusPlayer=='join' ){
           leaveGame()
@@ -429,7 +428,7 @@
       }
     }
 
-    async function startGame (){
+  let startGame = ()=>{
       console.log('statusPlayer='+statusPlayer)
       if(statusPlayer == 'join'){
         $('.btnStartStop').removeAttr('disabled')
@@ -449,8 +448,8 @@
 
 
 
-      await update()
-      setTimeout(()=>{tick()}, letTick);
+      update()
+      setTimeout(tick, letTick);
     }
 
     joinGame = ()=>{
