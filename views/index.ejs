@@ -314,22 +314,21 @@
       time =10,
       statusGame = 'off',
       statusPlayer = 'off',
-      statusFieldGame = 'lose'
-
-    let index = 0
-    let yd = 0
-    let data = [];
-    let plot = $.plot("#placeholder", data,{label: 'string'});
-    let speed = 0.001;
+      statusFieldGame = 'lose',
+      index = 0,
+      yd = 0,
+      data = [],
+      plot = $.plot("#placeholder", data,{label: 'string'}),
+      speed = 0.001;
 
     // GET BALANCE
     localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
     $('.balance').html(balance)
 
-    if($('.gameField').width()<500){
-      gameWidth = $('.gameField').width()
-
-    }
+    // if($('.gameField').width()<500){
+    //   gameWidth = $('.gameField').width()
+    //
+    // }
 
     let y = plot.getAxes().yaxis;
     let x = plot.getAxes().xaxis;
@@ -346,45 +345,15 @@
 
 
 
-    function update(){
-      if(gameActive){
-
-
-        // endGame
-        if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
-          gameActive = false
-          if(rate && statusPlayer == 'join'){
-            statusFieldGame = 'lose'
-            $('.res').append('-'+rate + ', ')
-            localStorage.setItem('balance', balance)
-            statusPlayer = 'leave'
-          }
-
-          addHistoryText()
-
-          setTimeout(()=>{timer()},2000)
-
-        }else{
-          if(timeOnStart>2.9){
-            y.options.max +=0.01
-          }
-          index += speed
-
-          data = [{
-              data: generate(index),
-              xaxis: 1,
-              yaxis:1,
-              lines: { show: true},
-          }];
-
-          plot.setData(data)
-          plot.setupGrid(true)
-          plot.draw()
-        }
-
-      setTimeout(()=>{update()},10)
-      }
-    }
+    // function update(){
+    //   if(gameActive){
+    //
+    //
+    //
+    //
+    //   setTimeout(()=>{update()},1000)
+    //   }
+    // }
 
     timer = ()=>{
       statusGame = 'reload'
@@ -422,8 +391,44 @@
         letTick = letTick-0.1
         timeOnStart += 0.01
         $('.coefficient').html(timeOnStart.toFixed(2))
-        setTimeout(tick,letTick);
 
+
+        // endGame
+        if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
+          gameActive = false
+          if(rate && statusPlayer == 'join'){
+            statusFieldGame = 'lose'
+            $('.res').append('-'+rate + ', ')
+            localStorage.setItem('balance', balance)
+            statusPlayer = 'leave'
+          }
+
+          addHistoryText()
+
+          setTimeout(()=>{timer()},2000)
+
+        }else{
+          if(timeOnStart>2.9){
+            y.options.max +=0.01
+          }
+          index += speed
+
+          data = [{
+              data: generate(index),
+              xaxis: 1,
+              yaxis:1,
+              lines: { show: true},
+          }];
+
+          plot.setData(data)
+          plot.setupGrid(true)
+          plot.draw()
+        }
+
+
+
+
+        setTimeout(tick,letTick);
       }else{
         $('.btnStartStop').html('Start')
       }
@@ -449,7 +454,7 @@
 
 
 
-      update()
+      // update()
       setTimeout(tick, letTick);
     }
 
