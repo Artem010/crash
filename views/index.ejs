@@ -408,21 +408,21 @@
           setTimeout(()=>{timer()},2000)
 
         }else{
-          if(timeOnStart>2.9){
-            y.options.max +=0.01
-          }
-          index += speed
-
-          data = [{
-              data: generate(index),
-              xaxis: 1,
-              yaxis:1,
-              lines: { show: true},
-          }];
-
-          plot.setData(data)
-          plot.setupGrid(true)
-          plot.draw()
+          // if(timeOnStart>2.9){
+          //   y.options.max +=0.01
+          // }
+          // index += speed
+          //
+          // data = [{
+          //     data: generate(index),
+          //     xaxis: 1,
+          //     yaxis:1,
+          //     lines: { show: true},
+          // }];
+          //
+          // plot.setData(data)
+          // plot.setupGrid(true)
+          // plot.draw()
         }
 
 
@@ -481,12 +481,6 @@
       $('.res').append(Math.round(winMoney) + '('+ timeOnStart.toFixed(2) + '), ')
       $('.btnStartStop').attr('disabled','')
 
-      // DRAW DOT ON THE LINE DIAGONAL
-      // ctx.beginPath()
-      // ctx.moveTo(xForLineDiagonal-1,yForLineDiagonal+yd)
-      // ctx.lineWidth = 10
-      // ctx.lineTo(xForLineDiagonal,yForLineDiagonal)
-      // ctx.stroke()
 
       localStorage.setItem('balance', balance)
     }
