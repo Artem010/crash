@@ -16,15 +16,15 @@ const io = require('socket.io')(server);
 const mysql = require('mysql2');
 const connection = mysql.createPool({
   host: "remotemysql.com",
-  user: "BpHhTy1dfD",
-  password: "4QDsWBLqQz",
-  database: "BpHhTy1dfD"
+  user: "B5hw25qJZT",
+  password: "sByKftco5L",
+  database: "B5hw25qJZT"
 });
 
 const initializePassport = require('./passport-config')
 initializePassport(
   passport,
-  login => users.find(user => user.login === login),
+  username => users.find(user => user.username === username),
   id => users.find(user => user.id === id)
 )
 
@@ -46,12 +46,9 @@ app.use(express.static('public'))
 app.get('/main.css', (req, res) => {
   res.sendFile(__dirname + '/main.css')
 })
-app.get('dino/control.css', (req, res) => {
-  res.sendFile(__dirname + '/dino/control.css')
-})
 
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { name: req.user.name, color: req.user.color })
+  res.render('index.ejs', { username: req.user.username, color: req.user.color })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -66,30 +63,34 @@ app.post('/login', getUser, checkNotAuthenticated, passport.authenticate('local'
 }))
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
-  res.render('register.ejs')
-})
-app.get('/dino', checkAuthenticated, (req, res) => {
-  res.render('dino.ejs')
+  res.render('register.ejs', {message:''})
 })
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+  if(req.body.password == req.body.passwordDouble){
 
-    function random (){return Math.floor(Math.random() * (255- 0) + 0)}
-    color = 'rgba('+random()+', '+random()+', '+random()+', 0.5)'
-    // console.log(color);
-      let sqlSELECT = "SELECT * FROM users WHERE login=? ";
-      connection.query(sqlSELECT, req.body.login, (err, result) => {
+    try {
+      const hashedPassword = await bcrypt.hash(req.body.password, 10)
+
+      function random (){return Math.floor(Math.random() * (255- 0) + 0)}
+      color = 'rgba('+random()+', '+random()+', '+random()+', 0.5)'
+      // console.log(color);
+      let sqlSELECT = "SELECT * FROM users WHERE username=? ";
+      connection.query(sqlSELECT, req.body.username, (err, result) => {
         if(result == ''){
-          regUserDB(req.body.login, req.body.name, hashedPassword, color);
+          regUserDB(req.body.username, hashedPassword, color);
           // console.log('Ok');
         }else console.log('error reg');
       })
       res.redirect('/login')
-  } catch (err) {
-    res.redirect('/register')
+    } catch (err) {
+      res.redirect('/register')
+    }
+
+  }else{
+    res.render('register.ejs',{message: 'Пароли не совпадают!'})
   }
+
 })
 
 app.get('/logout', (req, res) => {
@@ -115,7 +116,7 @@ function checkNotAuthenticated(req, res, next) {
 function getUser(req, res, next) {
 
   let promise = new Promise((resolve, reject) => {
-    findUserDB(req.body.login, resolve)
+    findUserDB(req.body.username, resolve)
   })
 
   promise.then(
@@ -128,11 +129,48 @@ function getUser(req, res, next) {
 
 server.listen(3000)
 
-let online =[]
+let
+  online = [],
+  maxOnline,
+  properties = {
+    status:'off',
+    crashScore:0,
+    history:[],
+    playersInform:[]
+    // playersInform:{
+    //   name:       ['artem'  , 'serg'],
+    //   rate:       ['0.32'   , '3.34'],
+    //   coefficient:[''       , ''    ],
+    //   winMoney:   [''       , ''    ]
+    // }
+
+  }
+
+
+connection.query('SELECT * FROM settings LIMIT 6', (err, result) => {
+  if (err) return console.log('ОШИБККА: ',err);
+
+  maxOnline = result[0].maxOnline
+
+  for (let i = 0; i < result.length; i++) {
+    properties.history.unshift(result[i].history)
+  }
+
+})
+
+function addHistoryText(){
+  properties.history.unshift(properties.crashScore/100)
+  properties.history.splice(properties.history.length-1,1)
+  addHistoryDB()
+  console.log('history='+properties.history);
+}
 
 io.on('connection', socket => {
 
+
+
   console.log("New coonect")
+  console.log(properties)
 
 
   socket.on('disconnect', () =>{
@@ -141,131 +179,200 @@ io.on('connection', socket => {
       online.splice(online.indexOf(user),1)
       let usersOn = []
       for (let i = 0; i < online.length; i++) {
-        usersOn.push(online[i].name)
+        usersOn.push(online[i].username)
       }
-      io.sockets.emit('connectDisconnectOnline', {name:user.name, value:'disconnected', online:usersOn})
+      io.sockets.emit('connectDisconnectOnline', {username:user.username, value:'disconnected', online:usersOn})
       console.log('onlineDisconnectLength',online.length)
     }
     console.log('user disconnected')
   })
 
   socket.on('newPointsRes', data =>{
-    addPointsDB(data.name, data.points)
+    // addPointsDB(data.username, data.balance)
+
+    let sqlSELECT = "UPDATE users SET balance=? WHERE username=?";
+    connection.query(sqlSELECT, [data.balance,data.username], function (err, result) {
+      if (err) return console.log('ОШИБККА: ',err);
+        console.log(result.affectedRows + " record(s) updated");
+
+
+        let r = []
+        let sqlSELECT2 = "SELECT * FROM users ORDER BY balance ";
+        connection.query(sqlSELECT2, function (err, result) {
+          if (err) return console.log('ОШИБККА: ',err);
+          for (let i = 0; i < result.length; i++) {
+            if(result[i].balance > 0){
+              r.unshift({
+                username: result[i].username,
+                balance: result[i].balance
+              })
+            }
+          }
+          io.sockets.emit('setPointsRes', r);
+        });
+
+
+
+    });
+
+
+
+
 
   })
+
   socket.on('updatedPointsRes', data =>{
     let r = []
-    let sqlSELECT2 = "SELECT * FROM users ORDER BY points ";
+    let sqlSELECT2 = "SELECT * FROM users ORDER BY balance ";
     connection.query(sqlSELECT2, function (err, result) {
       if (err) return console.log('ОШИБККА: ',err);
       for (let i = 0; i < result.length; i++) {
-        r.unshift({
-          name: result[i].name,
-          points: result[i].points
-        })
+        if(result[i].balance > 0){
+          r.unshift({
+            username: result[i].username,
+            balance: result[i].balance
+          })
+        }
       }
-      socket.emit('setPointsRes', r);
+      io.sockets.emit('setPointsRes', r);
     });
   })
 
   socket.on('newMessege', data =>{
-    addMsgDB(data.name, data.msg)
-    io.sockets.emit('Addmessage', {color:data.color, name:data.name, msg:data.msg})
+    addMsgDB(data.username, data.msg)
+    io.sockets.emit('Addmessage', {color:data.color, username:data.username, msg:data.msg})
+  })
+
+  socket.on('newMessegePoints', data =>{
+    if(data.val){
+      io.sockets.emit('Addmessage', {username:data.username, msg:data.msg, val:data.val})
+    }
   })
 
   socket.on('startSettings', data =>{
 
     online.push({
       socket:socket,
-      name:data.name
+      username:data.username
     })
+
+
+    if( online.length > 0 && properties.status == 'off' ){
+      game()
+    }else{
+      socket.emit('startGameFromServer', properties)
+    }
+
+
+    if(online.length > maxOnline){
+      addMaxOnlineDB(online.length)
+    }
     let usersOn = []
     for (let i = 0; i < online.length; i++) {
-      usersOn.push(online[i].name)
+      usersOn.push(online[i].username)
     }
-    io.sockets.emit('connectDisconnectOnline', {name:data.name, value:'connected', online:usersOn})
+    io.sockets.emit('connectDisconnectOnline', {username:data.username, value:'connected', online:usersOn})
 
     console.log('onlineConnectLength',online.length);
 
-    let m = [];
-    let sqlSELECT = "SELECT * FROM messeges ORDER BY id DESC LIMIT 15";
-    connection.query(sqlSELECT, function (err, result) {
+    let m = []
+    connection.query('SELECT * FROM messeges ORDER BY id DESC LIMIT 15', function (err, result) {
       if (err) return console.log('ОШИБККА: ',err);
       for (let i = 0; i < result.length; i++) {
         m.unshift({
           msg: result[i].messege,
-          name: result[i].name,
+          username: result[i].username,
           color: result[i].color
         })
       }
 
-      let r = [];
-      let sqlSELECT2 = "SELECT * FROM users ORDER BY points DESC";
-      connection.query(sqlSELECT2, function (err, result) {
-        if (err) return console.log('ОШИБККА: ',err);
-        for (let i = 0; i < result.length; i++) {
-          r.unshift({
-            name: result[i].name,
-            points: result[i].points
-          })
-        }
-        socket.emit('PFM', {messeges:m, rating:r});
-      });
-
-    });
+      socket.emit('PFM', {m:m,history:properties.history});
+    })
 
 
 
   });
 
+  socket.on('playerJoined', data=>{
+
+    let player ={
+      name:data.name,
+      rate:data.rate,
+      coefficient:'',
+      winMoney:''
+    }
+    properties.playersInform.push(player)
+    io.sockets.emit('playersInformFromServer', properties.playersInform)
+  })
+
+  socket.on('playerLeaves', data=>{
+
+    // .name,winMoney,coefficient
+    let player = properties.playersInform.find(line => line.name == data.name)
+    let indexPlayer = properties.playersInform.indexOf(player)
+    console.log('player='+player)
+    console.log('indexPlayer='+indexPlayer)
+
+    player.coefficient = data.coefficient
+    player.winMoney = data.winMoney
+
+    properties.playersInform.splice(indexPlayer,1,player)
+
+    console.log('playersInform='+properties.playersInform);
+
+
+    io.sockets.emit('playersInformFromServer', properties.playersInform)
+  })
+
 })
 
-function regUserDB(login, name, password, color) {
 
-  let sqlINSERT = "INSERT INTO users(login, name, password, color) VALUES (?, ?, ?, ?)";
-  connection.query(sqlINSERT, [login, name, password, color], function (err, result) {
+function regUserDB(username, password, color) {
+
+  let sqlINSERT = "INSERT INTO users(username, password, color, balance) VALUES (?, ?, ?,0)";
+  connection.query(sqlINSERT, [username, password, color], function (err, result) {
     if (err) return console.log('ОШИБККА: ',err);
     console.log("User registered");
   });
 
 }
 
-function addPointsDB(name, points) {
-  let sqlSELECT = "UPDATE users SET points=? WHERE name=?";
-  connection.query(sqlSELECT, [points,name], function (err, result) {
-    if (err) return console.log('ОШИБККА: ',err);
-      console.log(result.affectedRows + " record(s) updated");
-  });
+function addPointsDB(username, balance) {
+  // let sqlSELECT = "UPDATE users SET balance=? WHERE name=?";
+  // connection.query(sqlSELECT, [balance,name], function (err, result) {
+  //   if (err) return console.log('ОШИБККА: ',err);
+  //     console.log(result.affectedRows + " record(s) updated");
+  // });
 }
-function addMsgDB(name, msg) {
+
+function addMsgDB(username, msg) {
   var id ='F';
   var color ='';
-  let sqlSELECT = "SELECT * FROM users WHERE name=?";
-  connection.query(sqlSELECT, name, function (err, result) {
+  let sqlSELECT = "SELECT * FROM users WHERE username=?";
+  connection.query(sqlSELECT, username, function (err, result) {
     if (err) return console.log('ОШИБККА: ',err);
 
     id = result[0].id;
     color = result[0].color;
 
-    let sqlINSERT = "INSERT INTO messeges(id_name,name,messege,color) VALUES(?,?,?,?)";
-    connection.query(sqlINSERT, [id,name,msg,color], function (err, result) {
+    let sqlINSERT = "INSERT INTO messeges(id_name,username,messege,color) VALUES(?,?,?,?)";
+    connection.query(sqlINSERT, [id,username,msg,color], function (err, result) {
       if (err) return console.log('ОШИБККА: ',err);
-      console.log("Added msg by '", name, "'(", Date().toString(), ')');
+      console.log("Added msg by '", username, "'(", Date().toString(), ')');
     });
   });
 
 
 }
 
-function findUserDB(login, resolve) {
-  let sqlSELECT = "SELECT * FROM users WHERE login=?";
-  connection.query(sqlSELECT, login, (err, result) => {
+function findUserDB(username, resolve) {
+  let sqlSELECT = "SELECT * FROM users WHERE username=?";
+  connection.query(sqlSELECT, username, (err, result) => {
 
     result.forEach(item => {
       users.push ({
         id: item.id,
-        login: item.login,
-        name: item.name,
+        username: item.username,
         password:item.password,
         color: item.color
       })
@@ -274,4 +381,67 @@ function findUserDB(login, resolve) {
     resolve(true)
     // console.log('users=',users)
   })
+}
+
+function addMaxOnlineDB(onlineLength) {
+
+  // let sqlINSERT = "INSERT INTO settings(maxOnline) VALUES(?)";
+  let sqlINSERT = "UPDATE settings SET maxOnline=?";
+  connection.query(sqlINSERT, onlineLength, (err, result) => {
+    if (err) return console.log('ОШИБККА: ',err)
+    console.log("Added maxOnline")
+  });
+
+
+}
+
+function game (){
+  function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
+  properties.status = 'start'
+  properties.crashScore = rnd(200,800)
+  io.sockets.emit('startGameFromServer', properties)
+  properties.status = 'game'
+
+
+  timeOnStart=1
+  letTick = 75
+
+  tick = ()=>{
+    if(Number(timeOnStart.toFixed(2)) >= properties.crashScore/100){      // IF GAME ENDED
+
+      setTimeout(()=>{
+        properties.status = 'reload'
+        io.sockets.emit('startGameFromServer', properties)
+        addHistoryText()
+        properties.playersInform= []
+        io.sockets.emit('playersInformFromServer', properties.playersInform)
+        setTimeout(()=>{
+          if(online.length > 0){
+            game()
+          }else{
+            properties.status = 'off'
+            console.log('statusGAME=' +  properties.status);
+          }
+        }, 13000)
+
+      },2000)
+    }else{                                                                 // IF GAME NOW
+      letTick = letTick-0.1
+      timeOnStart += 0.01
+      setTimeout(tick,letTick);
+    }
+  }
+
+  setTimeout(tick,letTick)
+
+}
+
+function addHistoryDB() {
+  for (var i = 0; i < 6; i++) {
+    sqlSELECT = "UPDATE settings SET history=? WHERE id=?"
+    connection.query(sqlSELECT, [properties.history[i], (i+1)], function (err, result) {
+      if (err) return console.log('ОШИБККА: ',err)
+    })
+  }
+  console.log('UPDATE history')
 }

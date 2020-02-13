@@ -11,40 +11,105 @@
   <script src="__dirname/../socket.io/socket.io.js"></script>
 
 
+  <script language="javascript" type="text/javascript" src="js/jquery.mousewheel.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.canvaswrapper.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.colorhelpers.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.flot.saturated.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.flot.browser.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.flot.drawSeries.js"></script>
+  <script language="javascript" type="text/javascript" src="js/jquery.flot.uiConstants.js"></script>
+
+
+
+  <link rel="icon" href="runnerIcon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="main.css">
-  <link href="control.css" rel="stylesheet" type="text/css">
-  <title>Chat by Artem</title>
+  <link href="crash.css" rel="stylesheet" type="text/css">
+  <title>Runner by Artem</title>
 </head>
   <script type="text/javascript">
-      const userName = "<%= name %>"
+      const userName = "<%= username %>"
       const userColor = "<%= color %>"
   </script>
 <body>
 
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
 
-      <div class="col-md-8">
-
-        <h1>My - Control</h1>
-        <div class="containers">
-          <div class="textMenu">
-            <b id="counter">0</b>
-            <span id="oldCounter">HI:<b>0</b></span>
-          </div>
-          <button id="startBtn" class="gameBtn show" type="button">START</button>
-          <button onclick="restartGame()" id="restartBtn" class="gameBtn" type="button">RESTART</button>
-          <div class="runner-container">
-            <canvas id="cnv"></canvas>
-          </div>
+      <div class=" gameField col-lg-4">
+        <div class=" text-center history"></div>
+        <div class="cnv">
+          <h1 class="timex coefficientText"><span class="coefficient"></span>x</h1>
+          <h1 class="timex timerText"><span class="timer"></span>сек.</h1>
+          <h1 class="timex gameText"></h1>
+          <div class="demo-container">
+        			<div id="placeholder" class="demo-placeholder"></div>
+        	</div>
         </div>
-        <div id="rating"></div>
+
+          <div class="container btnsPanel">
+
+            <form id="formGame">
+
+
+              <div class="row">
+
+                <div class="col-6 form-group">
+                  <label for="rate">Ставка</label>
+                  <input id="rate" class="form-control rateInput" type="text" value="10" required>
+                </div>
+                <div class="col-6 form-group">
+                  <label>Авто Стоп</label>
+                  <input class="autoStop" type="checkbox" checked>
+                  <input class="form-control autoStopInput" type="text" value="1.50" required>
+                </div>
+
+              </div>
+
+              <button type="submit" class="btn btn-danger btnStartStop">Start</button>
+            </form>
+
+            <span>Balance: <b class="balance"></b></span>
+            <p>Results: <b class="res"></b></p>
+
+          </div>
+
+
 
       </div>
 
+      <div class="col-lg-5">
 
-      <div class="col-md-4">
+        <div class="container playersInform">
+          <div class="row table-responsive-sm">
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Игрок</th>
+                  <th scope="col">Ставка</th>
+                  <th scope="col">Кэф</th>
+                  <th scope="col">Выигрыш</th>
+                </tr>
+              </thead>
+              <tbody class="playersList">
+                <!-- <tr>
+                  <td>Mark</td>
+                  <td>100</td>
+                  <td>1.25</td>
+                  <td>125</td>
+                </tr> -->
+              </tbody>
+            </table>
+            <div class="noPlayers"></div>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div class="col-lg-3">
         <nav class="messeges"></nav>
 
         <form id="messageForm">
@@ -52,8 +117,8 @@
           <button type="submit" class="btn btn-danger" value="Send">Send</button>
         </form>
 
-        <b>Hi <%= name %></b>
-        <a href="/logout"> LogOut</a>
+
+        <a class="logout" href="/logout"> LogOut</a>
         <a tabindex="0" class="online" role="button" data-container="body" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="">
           <span>Online:</span><b></b>
         </a>
@@ -66,69 +131,86 @@
 
 
 
+
   <script>
 
 
   $(function () {
 
+    let
+      timerRun=false,
+      history = []
+
+
+    $('.coefficientText').hide()
+    $('.timerText').hide()
+
     function scrollButtom() {
       $(".messeges").stop().animate({ scrollTop: $(".messeges")[0].scrollHeight}, 1000);
     }
+    function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
+    function addHistoryText(){
 
-      $('.online').popover({
+      history.unshift(crashScore/100)
+      history.splice(history.length-1,1)
+
+
+      $('.history').html(()=>{
+        let str = ''
+        history.forEach( (i) => {
+          if(i==history[history.length-1])str += i + 'x'
+          else str += i + 'x, '
+        })
+        return str
+      })
+    }
+
+    $('.online').popover({
         container: 'body',
         trigger: 'focus'
       })
 
-
-
-
     const socket = io.connect()
-    let oldCounter= 0
-    socket.emit('updatedPointsRes', {name:userName})
-    socket.emit('startSettings', {name:userName})
+
+    socket.emit('startSettings', {username:userName})
 
     $('#messageForm').submit(e => {
       e.preventDefault()
       let msgInput = $('.inputMsg').val()
       if(msgInput != ''){
-        socket.emit('newMessege', {name:userName, msg:$('.inputMsg').val(), color:userColor})
+        socket.emit('newMessege', {username:userName, msg:$('.inputMsg').val(), color:userColor})
         $('.inputMsg').val('')
       }
     })
 
-    socket.on('setPointsRes', data =>{
-      let bodyPoints = []
-      data.forEach(function (entery) {
-        if(entery.points > 0){
-          if(userName == entery.name){
-            oldCounter = entery.points
-            // console.log('oldCounter=' +oldCounter)
-          }
-          $('#oldCounter b').html(oldCounter)
-          bodyPoints.push("<p><b>"+entery.name+"</b>: "+entery.points+"</p>");
-        }
-      })
-
-      $('#rating').html(()=>{
-        let it = ''
-        bodyPoints.forEach(function (i) {
-          it+=i
-        });
-        console.log('UPDATE_POINTS')
-        return it
-      })
-    })
-
     socket.on('PFM', data =>{
-        data.messeges.forEach(function (entery) {
-          $('.messeges').append("<p style='background-color:"+entery.color+"' class='alert'><b>"+entery.name+"</b>: "+entery.msg+"</p>");
+
+        data.m.forEach(function (entery) {
+          $('.messeges').append("<p style='background-color:"+entery.color+"' class='alert'><b>"+entery.username+"</b>: "+entery.msg+"</p>");
         })
+
+        history = data.history
+        $('.history').html(()=>{
+          let str = ''
+          history.forEach( (i) => {
+            if(i==history[history.length-1])str += i + 'x'
+            else str += i + 'x, '
+          })
+          return str
+        })
+
       scrollButtom()
     })
+
     socket.on('Addmessage', data =>{
       // console.log('message: ' + msg);
-      $('.messeges').append("<div style='background-color:"+data.color+"' class='alert'><b>"+data.name+"</b>: "+data.msg+"</div>")
+      if(data.val == 'newRecord'){
+        $('.messeges').append("<div class='alert newRecord'><b>"+data.username+"</b>: "+data.msg+"</div>")
+      }else if(data.val == 'myResult'){
+        $('.messeges').append("<div class='alert myResult'><b>"+data.username+"</b>: "+data.msg+"</div>")
+      }else{
+        $('.messeges').append("<div style='background-color:"+data.color+"' class='alert'><b>"+data.username+"</b>: "+data.msg+"</div>")
+      }
       scrollButtom()
     })
 
@@ -150,335 +232,298 @@
             })
 
 
-        console.log(data.online)
+        // console.log(data.online)
 
-      $('.messeges').append("<div class='alert'><b>"+data.name+"</b> "+ data.value+"</div>")
+      $('.messeges').append("<div class='alert text-center connectDisconnect'><b>"+data.username+"</b> "+ data.value+"</div>")
       scrollButtom()
     })
 
+    socket.on('playersInformFromServer', data =>{
+      console.log(data)
 
-    let restartBtn = $('#restartBtn')
-    let startBtn = $('#startBtn')
-    let counterB = document.getElementById('counter')
-    let canvas = $('#cnv')[0]
-    console.log(canvas);
-    let context = canvas.getContext('2d')
+      if(data.length > 0){
+        $('.noPlayers').html('')
+        $('.playersList').html(()=>{
+          str=""
+          data.forEach(item=>{
+            str+="<tr>"
+            str += "<td>"+item.name+"</td>"
+            str += "<td>"+item.rate+"</td>"
+            str += "<td>"+item.coefficient+"</td>"
+            str += "<td>"+item.winMoney+"</td>"
+            str+="</tr>"
+          })
+          return str
+        })
 
-    let device
-    let windowWidth
-    let speed = 3;
-    let player = {
-      x: 50,
-      y: canvas.height+50,
-      width:32,
-      height:32,
-      ySpeed:0,
-      jumping:false,
-      gravity:0.75
-    }
-    if(window.screen.width < 600){
-      windowWidth = window.screen.width
-      device = 'phone'
-      player.gravity = 0.55
-      if(windowWidth < 350) speed = 1
-      else if (windowWidth >=350 && windowWidth < 600) speed = 2
-    }else{
-      device = 'pc'
-      windowWidth = 600
-    }
-    const windowHeight = window.screen.height
-
-    let dist = 150
-    let xpos1 = 0
-    let xpos2 = 0
-    let xpos3 = 0
-    let ypos = 0
-    let endGame = false
-    let cubes =[]
-    let counter= 0
-    // if(!oldCounter){
-    //   // oldCounter=localStorage.getItem('count')
-    // }else
-
-    // localStorage.setItem('count', 0)
-
-
-    restartGame = (e)=>{
-      counter = 0
-      $('#oldCounter b').html(oldCounter)
-      restartBtn.removeClass('show')
-      endGame =false
-      xpos1 = cube1.x + dist
-      xpos2 = xpos1 + cube2.x + dist
-      xpos3 = xpos2 + cube3.x + dist
-      ypos1 = cube1.y
-      ypos2 = cube1.y
-      ypos3 = cube1.y
-      console.log('restart');
-    }
-    function rnd(min,max){return Math.floor(Math.random() * (max- 0) + min)}
-
-    canvas.width = windowWidth
-    canvas.height = 250
-    canvas.style.background = '#ff8'
-    let cube1 = {
-      width:16,
-      height:32,
-      x: canvas.width,
-      y: canvas.height-20-32
-    }
-    let cube2 = {
-      width:50,
-      height:20,
-      x: canvas.width,
-      y: canvas.height-20-20
-
-    }
-    let cube3 = {
-      width:20,
-      height:50,
-      x: canvas.width,
-      y: canvas.height-20-50
-    }
-
-
-
-    controller = {
-      up:false,
-      listener: (e)=>{
-        if( (e.type == 'keydown' && (e.keyCode == 38 || e.keyCode == 32) ) || e.type == 'touchstart' ){
-          controller.up = true
-          // console.log('SpeedGame='+speed+(0.5*counter/1000));
-        }else controller.up = false
       }
-    }
-
-
-    draw = ()=>{
-
-      if(
-          ( (xpos1+new_cube1.width) >=50 && xpos1 <=82 ) && player.y >= (ypos1-new_cube1.height) ||
-          ( (xpos2+new_cube2.width) >=50 && xpos2 <=82 ) && player.y >= (ypos2-new_cube2.height) ||
-          ( (xpos3+new_cube3.width) >=50 && xpos3 <=82 ) && player.y >= (ypos3-new_cube3.height)
-        ){
-
-        context.clearRect(0,0, windowWidth, windowHeight)
-        endGame = true
-        restartBtn.addClass('show')
-        if(Math.round(counter/10) > oldCounter){
-          socket.emit('newPointsRes', {name:userName,points:Math.round(counter/10)})
-          socket.emit('updatedPointsRes', {name:userName})
-          // localStorage.setItem('count', Math.round(counter/10))
-          oldCounter = Math.round(counter/10)
-          console.log('add');
-        }
-
-
-      }else if (!endGame){
-        context.clearRect(0,0, windowWidth, windowHeight)
-        context.fillRect(player.x, player.y, player.width, player.height) //CREATE PLAYER
-
-        context.beginPath();
-        context.moveTo(0, context.canvas.height-20);
-        context.lineTo(context.canvas.width, context.canvas.height-20);
-        context.stroke();
-
-        switch (rndCubes1) {
-          case 1:
-            new_cube1 = {
-              width: cube1.width,
-              height: cube1.height,
-              y: cube1.y
-            }
-            context.fillRect(xpos1, new_cube1.y, new_cube1.width, new_cube1.height) //CREATE CUBES1
-            break;
-          case 2:
-           new_cube1 = {
-              width: cube2.width,
-              height: cube2.height,
-              y: cube2.y
-            }
-            context.fillRect(xpos1, new_cube1.y, new_cube1.width, new_cube1.height) //CREATE CUBES1
-            break;
-          case 3:
-            new_cube1 = {
-              width: cube3.width,
-              height: cube3.height,
-              y: cube3.y
-            }
-            context.fillRect(xpos1, new_cube1.y, new_cube1.width, new_cube1.height) //CREATE CUBES1
-            break;
-        }
-
-        switch (rndCubes2) {
-          case 1:
-            new_cube2 = {
-              width: cube1.width,
-              height: cube1.height,
-              y: cube1.y
-            }
-            context.fillRect(xpos2 , new_cube2.y, new_cube2.width, new_cube2.height) //CREATE CUBES2
-            break;
-          case 2:
-             new_cube2 = {
-              width: cube2.width,
-              height: cube2.height,
-              y: cube2.y
-            }
-            context.fillRect(xpos2 , new_cube2.y, new_cube2.width, new_cube2.height) //CREATE CUBES2
-            break;
-          case 3:
-             new_cube2 = {
-              width: cube3.width,
-              height: cube3.height,
-              y: cube3.y
-            }
-            context.fillRect(xpos2 , new_cube2.y, new_cube2.width, new_cube2.height) //CREATE CUBES2
-            break;
-        }
-
-        switch (rndCubes3) {
-          case 1:
-            new_cube3 = {
-              width: cube1.width,
-              height: cube1.height,
-              y: cube1.y
-            }
-
-            context.fillRect(xpos3 , new_cube3.y, new_cube3.width, new_cube3.height) //CREATE CUBES3
-            break;
-          case 2:
-            new_cube3 = {
-              width: cube2.width,
-              height: cube2.height,
-              y: cube2.y
-            }
-            context.fillRect(xpos3 , new_cube3.y, new_cube3.width, new_cube3.height) //CREATE CUBES3
-            break;
-          case 3:
-            new_cube3 = {
-              width: cube3.width,
-              height: cube3.height,
-              y: cube3.y
-            }
-            context.fillRect(xpos3 , new_cube3.y, new_cube3.width, new_cube3.height) //CREATE CUBES3
-            break;
-        }
-
-
-
-
-        counter++
-        $('#counter').html(Math.round(counter/10))
-        // console.log('counter=' + Math.round(counter/10));
-
-
-      }else{
-
-        // console.log('end');
+      else{
+        $('.playersList').html("")
+        $('.noPlayers').html("<span>Нет игроков в игре</span>")
       }
-    }
 
 
-    $('#startBtn').on('click', (e)=>{
-      startBtn.removeClass('show')
-      updateCube()
+
     })
 
-    let updateCube = () =>{
-      requestAnimationFrame(updateCube)
-      if (controller.up && player.jumping == false) {
-        player.ySpeed -= 20;
-        player.jumping = true;
+    socket.on('startGameFromServer', properties => {
+      // start = dataStart
+      if(!timerRun && properties.status == 'start'){
+        $('.timerText').hide()
+        $('.gameText').hide()
+        $('.coefficientText').show()
+        time = 0
+        crashScore = properties.crashScore
+        startGame()
+      }else if(!timerRun && properties.status == 'reload'){
+        statusGame = 'reload'
+        // history = properties.history
+        // addHistoryText()
+        $('.gameText').html('Reload...')
+        // timer()
+      }else if (!timerRun && properties.status == 'game'){
+        // history = properties.history
+        // addHistoryText()
+        statusGame = 'game'
+        $('.gameText').html('Game now...')
       }
-      player.ySpeed += player.gravity;// gravity
-      player.y += player.ySpeed;
-      player.ySpeed *= 0.9;// friction
-      if (player.y > context.canvas.height- 20 - 32) {
-        player.jumping = false;
-        player.y = context.canvas.height -20 - 32;
-        player.ySpeed = 0;
+
+    })
+
+
+    function generate(start) {
+        var res = [];
+        let x, yLocal
+
+        for (let i = 0; i <= 2; i++) {
+            x = i
+            yLocal=(timeOnStart*i)/2
+            res.push([x, yLocal]);
+        }
+        return res;
+    }
+
+    let
+      gameWidth = 500,
+      gameHeight = 300,
+      timeOnStart=1,
+      gameActive = false,
+      crashScore,
+      balance,
+      rate,
+      letTick = 75,
+      autoStop,
+      time =10,
+      statusGame = 'off',
+      statusPlayer = 'off',
+      statusFieldGame = 'lose'
+
+    let index = 0
+    let yd = 0
+    let data = [];
+    let plot = $.plot("#placeholder", data,{label: 'string'});
+    let speed = 0.001;
+
+    // GET BALANCE
+    localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
+    $('.balance').html(balance)
+
+    if($('.gameField').width()<500){
+      gameWidth = $('.gameField').width()
+
+    }
+
+    let y = plot.getAxes().yaxis;
+    let x = plot.getAxes().xaxis;
+
+    // y.options.min = 1
+    y.options.max = 3
+    y.options.growOnly = false;
+    y.options.autoScale = "none"
+    // y.options.autoScaleMargin = 1;
+    y.options.showMinorTicks = 'true';
+    x.options.showTickLabels = 'none';
+    x.options.gridLines = 'true';
+    x.options.ticks = 'null';
+
+
+
+
+    update = ()=>{
+      if(gameActive){
+        requestAnimationFrame(update)
+
+        // endGame
+        if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
+          gameActive = false
+          if(rate && statusPlayer == 'join'){
+            statusFieldGame = 'lose'
+            $('.res').append('-'+rate + ', ')
+            localStorage.setItem('balance', balance)
+            statusPlayer = 'leave'
+          }
+
+          // if(statusFieldGame == 'lose') {
+          //   ctx.fillStyle = 'red'
+          // }else{
+          //   ctx.fillStyle = 'green'
+          // }
+          //
+          // ctx.fillRect(0,0,canvas.width,canvas.height)
+
+
+
+          addHistoryText()
+
+
+          setTimeout(()=>{
+            timer()
+            // ctx.fillStyle = 'yellow'
+            // ctx.fillRect(0,0,canvas.width,canvas.height)
+          },2000)
+
+        }else{
+          if(timeOnStart>2.9){
+            y.options.max +=0.01
+          }
+          index += speed
+
+          data = [{
+              data: generate(index),
+              xaxis: 1,
+              yaxis:1,
+              lines: { show: true},
+          }];
+
+          plot.setData(data)
+          plot.setupGrid(true)
+          plot.draw()
+        }
+
+
+      }
+    }
+
+    timer = ()=>{
+      statusGame = 'reload'
+      statusFieldGame = 'lose'
+      $('.btnStartStop').removeAttr('disabled')
+      $('.coefficientText').hide()
+      $('.timerText').show()
+      time = 12
+      $('.timer').html(time)
+
+      timerTick = ()=>{
+        if(time > 1){
+          time -= 1
+          $('.timer').html(time)
+          setTimeout(timerTick,1000);
+        }else{
+          timerRun=false
+          $('.timer').html('')
+          $('.coefficient').html('1.00')
+          $('.timerText').hide()
+          $('.coefficientText').show()
+        }
       }
 
+      setTimeout(timerTick,1000);
 
-      if(xpos1 < -cube1.width && !endGame){
-        rndPixels1 = rnd(-450,450);
-        rndCubes1 = rnd(1,3);
-        xpos1 = xpos3+cube1.x + dist + rndPixels1
-        console.log('rndCubes1=' + rndCubes1);
+    }
 
-
-      }else if(xpos2 < -cube2.width && !endGame){
-        rndPixels2 = rnd(-450,450);
-        rndCubes2 = rnd(1,3);
-        xpos2 = xpos1+ cube2.x + dist + rndPixels2
-        console.log('rndCubes2=' + rndCubes2);
-
-      }else if(xpos3 < -cube3.width && !endGame){
-        rndPixels3 = rnd(-450,450);
-        rndCubes3 = rnd(1,3);
-        xpos3 = xpos2+ cube3.x +dist + rndPixels3
-        console.log('rndCubes3=' + rndCubes3);
+    tick = ()=>{
+      if(gameActive){
+        if(timeOnStart >= Number(autoStop) && statusPlayer=='join' ){
+          leaveGame()
+        }
+        speed+=timeOnStart
+        letTick = letTick-0.1
+        timeOnStart += 0.01
+        $('.coefficient').html(timeOnStart.toFixed(2))
+        setTimeout(tick,letTick);
 
       }else{
-        xpos1 -= (speed+(0.5*counter/1000))
-        xpos2 -= (speed+(0.5*counter/1000))
-        xpos3 -= (speed+(0.5*counter/1000))
+        $('.btnStartStop').html('Start')
       }
-      draw()
+    }
+
+    startGame = ()=>{
+      console.log('statusPlayer='+statusPlayer)
+      if(statusPlayer == 'join'){
+        $('.btnStartStop').removeAttr('disabled')
+      }else{
+        $('.btnStartStop').attr('disabled','')
+      }
+      $('.coefficientText').show()
+      $('.btnsPanel .alert').hide()
+      xForLineDiagonal = 0
+      yForLineDiagonal = gameHeight
+      letTick = 75
+      timeOnStart=1
+      gameActive = true
+      statusGame = 'game'
+      index = 0
+      y.options.max =3
+      // crashScore = rnd(120,500)
+      console.log('crashScore=' + crashScore/100)
+
+
+
+      update()
+      setTimeout(tick, letTick);
+    }
+
+    joinGame = ()=>{
+     if (statusGame == 'reload'){
+       statusPlayer = 'join'
+       // EMIT TO SERVER (RATE NAME)
+       rate = $('.rateInput').val()
+       balance = balance - rate
+       socket.emit('playerJoined', {name:userName, rate:rate})
+       $('.balance').html(balance)
+       $('.btnStartStop').attr('disabled','')
+     }
+    }
+
+    leaveGame = ()=>{
+      statusPlayer = 'leave'
+      $('.btnStartStop').html('Start')
+      let winMoney = timeOnStart.toFixed(2) * rate
+      balance = Math.round(balance + winMoney)
+      statusFieldGame = 'win'
+      socket.emit('playerLeaves', {name:userName, coefficient:timeOnStart.toFixed(2), winMoney:Math.round(winMoney)} )
+      $('.balance').html(balance)
+      $('.res').append(Math.round(winMoney) + '('+ timeOnStart.toFixed(2) + '), ')
+      $('.btnStartStop').attr('disabled','')
+
+      // DRAW DOT ON THE LINE DIAGONAL
+      // ctx.beginPath()
+      // ctx.moveTo(xForLineDiagonal-1,yForLineDiagonal+yd)
+      // ctx.lineWidth = 10
+      // ctx.lineTo(xForLineDiagonal,yForLineDiagonal)
+      // ctx.stroke()
+
+      localStorage.setItem('balance', balance)
     }
 
 
+    $('#formGame').submit(e=>{
+      e.preventDefault()
+      if(!gameActive && (statusGame=='reload') && ($('.rateInput').val() != '') && ($('.rateInput').val() <= balance) && ($('.rateInput').val() != 0 && ($('.btnStartStop').text() == 'Start'))){
+        $('.btnStartStop').html('Stop')
+        if($('.autoStop').is(':checked')){
+          autoStop = $('.autoStopInput').val()
+          console.log('autoStop='+autoStop)
+        }else{
+          autoStop = 999
+        }
+        joinGame()
+      }else if(statusGame == 'game' && $('.btnStartStop').text() == 'Stop'){
+        leaveGame()
 
-    // var rndPixels1 = rnd(100,250);
-    // var rndPixels2 = rnd(300,450);
-    // var rndPixels3 = rnd(500,600);
-    let rndCubes1 = rnd(1,3);
-    let rndCubes2 = rnd(1,3);
-    let rndCubes3 = rnd(1,3);
-    console.log('rndCubes1=' + rndCubes1);
-    console.log('rndCubes2=' + rndCubes2);
-    console.log('rndCubes3=' + rndCubes3);
+      }
 
-    xpos1 = cube1.x + dist
-    xpos2 = xpos1 + cube2.x + dist
-    xpos3 = xpos2 + cube3.x + dist
-    // console.log('xpos1=' + xpos1);  //750
-    // console.log('xpos2=' + xpos2);  //1500
-    // console.log('xpos3=' + xpos3);  //2250
-
-    ypos1 = cube1.y
-    ypos2 = cube1.y
-    ypos3 = cube1.y
-
-    var new_cube1 = {
-      width: 0,
-      height: 0,
-      y: 0
-    }
-    var new_cube2 = {
-      width: 0,
-      height: 0,
-      y: 0
-    }
-    var new_cube3 = {
-      width: 0,
-      height: 0,
-      y: 0
-    }
-    // let new_cube2
-    // let new_cube3
-
-
-
-
-    window.addEventListener("touchstart", controller.listener)
-
-    window.addEventListener("touchend", controller.listener)
-    window.addEventListener("keydown", controller.listener)
-    window.addEventListener("keyup", controller.listener)
-
-
+    })
 
 
 
@@ -487,6 +532,5 @@
 
 
   </script>
-  <!-- <script src="game.js" type="text/javascript"></script> -->
 </body>
 </html>
