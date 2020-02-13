@@ -345,15 +345,45 @@
 
 
 
-    // function update(){
-    //   if(gameActive){
-    //
-    //
-    //
-    //
-    //   setTimeout(()=>{update()},1000)
-    //   }
-    // }
+    async function update(){
+      if(gameActive){
+
+
+        // endGame
+        if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
+          gameActive = false
+          if(rate && statusPlayer == 'join'){
+            statusFieldGame = 'lose'
+            $('.res').append('-'+rate + ', ')
+            localStorage.setItem('balance', balance)
+            statusPlayer = 'leave'
+          }
+
+          addHistoryText()
+
+          setTimeout(()=>{timer()},2000)
+
+        }else{
+          if(timeOnStart>2.9){
+            y.options.max +=0.01
+          }
+          index += speed
+
+          data = [{
+              data: generate(index),
+              xaxis: 1,
+              yaxis:1,
+              lines: { show: true},
+          }];
+
+          plot.setData(data)
+          plot.setupGrid(true)
+          plot.draw()
+        }
+
+      setTimeout(()=>{update()},100)
+      }
+    }
 
     timer = ()=>{
       statusGame = 'reload'
@@ -387,54 +417,18 @@
         if(timeOnStart >= Number(autoStop) && statusPlayer=='join' ){
           leaveGame()
         }
+        setTimeout(tick,letTick);
         speed+=timeOnStart
         letTick = letTick-0.1
         timeOnStart += 0.01
         $('.coefficient').html(timeOnStart.toFixed(2))
 
-
-        // endGame
-        if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
-          gameActive = false
-          if(rate && statusPlayer == 'join'){
-            statusFieldGame = 'lose'
-            $('.res').append('-'+rate + ', ')
-            localStorage.setItem('balance', balance)
-            statusPlayer = 'leave'
-          }
-
-          addHistoryText()
-
-          setTimeout(()=>{timer()},2000)
-
-        }else{
-          // if(timeOnStart>2.9){
-          //   y.options.max +=0.01
-          // }
-          // index += speed
-          //
-          // data = [{
-          //     data: generate(index),
-          //     xaxis: 1,
-          //     yaxis:1,
-          //     lines: { show: true},
-          // }];
-          //
-          // plot.setData(data)
-          // plot.setupGrid(true)
-          // plot.draw()
-        }
-
-
-
-
-        setTimeout(tick,letTick);
       }else{
         $('.btnStartStop').html('Start')
       }
     }
 
-    startGame = ()=>{
+    async function startGame (){
       console.log('statusPlayer='+statusPlayer)
       if(statusPlayer == 'join'){
         $('.btnStartStop').removeAttr('disabled')
@@ -454,7 +448,7 @@
 
 
 
-      // update()
+      await update()
       setTimeout(tick, letTick);
     }
 
@@ -481,6 +475,12 @@
       $('.res').append(Math.round(winMoney) + '('+ timeOnStart.toFixed(2) + '), ')
       $('.btnStartStop').attr('disabled','')
 
+      // DRAW DOT ON THE LINE DIAGONAL
+      // ctx.beginPath()
+      // ctx.moveTo(xForLineDiagonal-1,yForLineDiagonal+yd)
+      // ctx.lineWidth = 10
+      // ctx.lineTo(xForLineDiagonal,yForLineDiagonal)
+      // ctx.stroke()
 
       localStorage.setItem('balance', balance)
     }
