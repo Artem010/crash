@@ -137,13 +137,6 @@ let
     crashScore:0,
     history:[],
     playersInform:[]
-    // playersInform:{
-    //   name:       ['artem'  , 'serg'],
-    //   rate:       ['0.32'   , '3.34'],
-    //   coefficient:[''       , ''    ],
-    //   winMoney:   [''       , ''    ]
-    // }
-
   }
 
 
