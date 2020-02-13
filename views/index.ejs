@@ -348,7 +348,7 @@
 
     update = ()=>{
       if(gameActive){
-        requestAnimationFrame(update)
+
 
         // endGame
         if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
@@ -382,7 +382,7 @@
           plot.draw()
         }
 
-
+      setTimeout(()=>{update()},100)
       }
     }
 
