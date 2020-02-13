@@ -347,6 +347,7 @@
 
     async function update(){
       if(gameActive){
+        setTimeout(()=>{update()},100)
 
 
         // endGame
@@ -381,7 +382,7 @@
           plot.draw()
         }
 
-      setTimeout(()=>{update()},100)
+
       }
     }
 
@@ -412,7 +413,7 @@
 
     }
 
-    tick = ()=>{
+    let tick = ()=>{
       if(gameActive){
         if(timeOnStart >= Number(autoStop) && statusPlayer=='join' ){
           leaveGame()
@@ -449,7 +450,7 @@
 
 
       await update()
-      setTimeout(tick, letTick);
+      setTimeout(()=>{tick()}, letTick);
     }
 
     joinGame = ()=>{
