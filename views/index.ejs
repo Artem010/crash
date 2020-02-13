@@ -292,7 +292,7 @@
 
 
     function generate(start) {
-        var res = [];
+        let res = [];
         let x, yLocal
 
         for (let i = 0; i <= 2; i++) {
@@ -304,8 +304,6 @@
     }
 
     let
-      gameWidth = 500,
-      gameHeight = 300,
       timeOnStart=1,
       gameActive = false,
       crashScore,
@@ -336,11 +334,10 @@
     let y = plot.getAxes().yaxis;
     let x = plot.getAxes().xaxis;
 
-    // y.options.min = 1
+
     y.options.max = 3
     y.options.growOnly = false;
     y.options.autoScale = "none"
-    // y.options.autoScaleMargin = 1;
     y.options.showMinorTicks = 'true';
     x.options.showTickLabels = 'none';
     x.options.gridLines = 'true';
@@ -363,24 +360,9 @@
             statusPlayer = 'leave'
           }
 
-          // if(statusFieldGame == 'lose') {
-          //   ctx.fillStyle = 'red'
-          // }else{
-          //   ctx.fillStyle = 'green'
-          // }
-          //
-          // ctx.fillRect(0,0,canvas.width,canvas.height)
-
-
-
           addHistoryText()
 
-
-          setTimeout(()=>{
-            timer()
-            // ctx.fillStyle = 'yellow'
-            // ctx.fillRect(0,0,canvas.width,canvas.height)
-          },2000)
+          setTimeout(()=>{timer()},2000)
 
         }else{
           if(timeOnStart>2.9){
@@ -456,8 +438,6 @@
       }
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
-      xForLineDiagonal = 0
-      yForLineDiagonal = gameHeight
       letTick = 75
       timeOnStart=1
       gameActive = true
