@@ -270,17 +270,18 @@
       // start = dataStart
       if(!timerRun && properties.status == 'start'){
         $('.timerText').hide()
-        $('.gameText').hide()
+
         $('.coefficientText').show()
         time = 0
         crashScore = properties.crashScore
         startGame()
-      }else if(!timerRun && properties.status == 'reload'){
+      }else if(statusGame=='game' && properties.status == 'reload'){
+        $('.gameText').hide()
         statusGame = 'reload'
+        timer()
         // history = properties.history
         // addHistoryText()
-        $('.gameText').html('Reload...')
-        // timer()
+        // $('.gameText').html('Reload...')
       }else if (!timerRun && properties.status == 'game'){
         // history = properties.history
         // addHistoryText()
@@ -358,7 +359,7 @@
 
           addHistoryText()
           // socket.emit('end',true)
-          setTimeout(()=>{timer()},2000)
+          // setTimeout(()=>{timer()},2000)
 
 
         }else{
