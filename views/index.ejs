@@ -239,7 +239,6 @@
     })
 
     socket.on('playersInformFromServer', data =>{
-      console.log(data)
 
       if(data.length > 0){
         $('.noPlayers').html('')
@@ -310,6 +309,7 @@
       balance,
       rate,
       letTick = 75,
+      letTickMinus = 0.1,
       autoStop,
       time =10,
       statusGame = 'off',
@@ -319,7 +319,7 @@
       yd = 0,
       data = [],
       plot = $.plot("#placeholder", data,{label: 'string'}),
-      speed = 0.001;
+      speed = 0.001
 
     // GET BALANCE
     localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
@@ -420,7 +420,7 @@
         }
         setTimeout(tick,letTick);
         speed+=timeOnStart
-        letTick = letTick-0.1
+        letTick = letTick-letTickMinus
         timeOnStart += 0.01
         $('.coefficient').html(timeOnStart.toFixed(2))
 
@@ -430,7 +430,7 @@
     }
 
   let startGame = ()=>{
-      console.log('statusPlayer='+statusPlayer)
+      // console.log('statusPlayer='+statusPlayer)
       if(statusPlayer == 'join'){
         $('.btnStartStop').removeAttr('disabled')
       }else{
@@ -441,10 +441,9 @@
 
       if(window.screen.width<500){
         letTick = 61.15
-      }else{
-        letTick = 75
+        letTickMinus = 0.08,
       }
-      console.log(letTick)
+      // console.log(letTick)
 
 
       timeOnStart=1
