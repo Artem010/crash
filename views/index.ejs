@@ -325,10 +325,11 @@
     localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
     $('.balance').html(balance)
 
-    // if($('.gameField').width()<500){
-    //   gameWidth = $('.gameField').width()
-    //
-    // }
+    if($('.gameField').width()<500){
+      // gameWidth = $('.gameField').width()
+      letTick = 60,
+
+    }
 
     let y = plot.getAxes().yaxis;
     let x = plot.getAxes().xaxis;
@@ -476,13 +477,6 @@
       $('.balance').html(balance)
       $('.res').append(Math.round(winMoney) + '('+ timeOnStart.toFixed(2) + '), ')
       $('.btnStartStop').attr('disabled','')
-
-      // DRAW DOT ON THE LINE DIAGONAL
-      // ctx.beginPath()
-      // ctx.moveTo(xForLineDiagonal-1,yForLineDiagonal+yd)
-      // ctx.lineWidth = 10
-      // ctx.lineTo(xForLineDiagonal,yForLineDiagonal)
-      // ctx.stroke()
 
       localStorage.setItem('balance', balance)
     }
