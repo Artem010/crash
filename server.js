@@ -416,7 +416,7 @@ function addMaxOnlineDB(onlineLength) {
 function game (){
   function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
   properties.status = 'start'
-  properties.crashScore = rnd(100,200)
+  properties.crashScore = rnd(100,500)
   // properties.playersOnline = 0
   io.sockets.emit('startGameFromServer', properties)
   properties.status = 'game'
