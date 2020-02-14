@@ -270,7 +270,7 @@
       // start = dataStart
       if(!timerRun && properties.status == 'start'){
         $('.timerText').hide()
-
+        $('.gameText').hide()
         $('.coefficientText').show()
         time = 0
         crashScore = properties.crashScore
@@ -279,12 +279,11 @@
         $('.gameText').hide()
         statusGame = 'reload'
         timer()
-        // history = properties.history
-        // addHistoryText()
         // $('.gameText').html('Reload...')
+      }else if(!timerRun && properties.status == 'reload'){
+        $('.gameText').html('Reload...')
       }else if (!timerRun && properties.status == 'game'){
-        // history = properties.history
-        // addHistoryText()
+
         statusGame = 'game'
         $('.gameText').html('Game now...')
       }
@@ -439,7 +438,7 @@
       $('.btnsPanel .alert').hide()
 
       if($('.gameField').width()<500){
-        letTick = 61.5
+        letTick = 61.2
       }else{
         letTick = 75
       }
