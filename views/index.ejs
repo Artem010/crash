@@ -360,9 +360,9 @@
           }
 
           addHistoryText()
-          socket.emit('end',true)
-          // setTimeout(()=>{timer()},2000)
-          timer()
+          // socket.emit('end',true)
+          setTimeout(()=>{timer()},2000)
+
 
         }else{
           if(timeOnStart>2.9){
@@ -382,7 +382,8 @@
           plot.draw()
         }
 
-      setTimeout(()=>{update()},100)
+      // setTimeout(()=>{update()},100)
+      requestAnimationFrame( update )
       }
     }
 
