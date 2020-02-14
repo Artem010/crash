@@ -325,11 +325,7 @@
     localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
     $('.balance').html(balance)
 
-    if($('.gameField').width()<500){
-      // gameWidth = $('.gameField').width()
-      letTick = 60
 
-    }
 
     let y = plot.getAxes().yaxis;
     let x = plot.getAxes().xaxis;
@@ -440,7 +436,14 @@
       }
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
-      letTick = 75
+
+      if($('.gameField').width()<500){
+        letTick = 60
+      }else{
+        letTick = 75
+      }
+
+      
       timeOnStart=1
       gameActive = true
       statusGame = 'game'
