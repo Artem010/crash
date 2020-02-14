@@ -61,7 +61,7 @@
                 </div>
                 <div class="col-6 form-group">
                   <label>Авто Стоп</label>
-                  <input class="autoStop" type="checkbox" checked>
+                  <input class="autoStop" type="checkbox" >
                   <input class="form-control autoStopInput" type="text" value="1.50" required>
                 </div>
 
@@ -70,7 +70,7 @@
               <button type="submit" class="btn btn-danger btnStartStop">Start</button>
             </form>
 
-            <span>Balance: <b class="balance"></b></span>
+            <span>Balance: <b class="balance"></b>$</span>
             <p>Results: <b class="res"></b></p>
 
           </div>
@@ -82,6 +82,7 @@
       <div class="col-lg-5">
 
         <div class="container playersInform">
+          <div class="row text-center playerCountAndBANK"><h4><span class="count">0</span> игроков ставят <span class="bank">0</span>$</h4></div>
           <div class="row table-responsive-sm">
 
             <table class="table">
@@ -102,7 +103,7 @@
                 </tr> -->
               </tbody>
             </table>
-            <div class="noPlayers"></div>
+            <div class="text-center noPlayers"><span>Нет игроков в игре...</span></div>
           </div>
         </div>
 
@@ -139,7 +140,8 @@
 
     let
       timerRun=false,
-      history = []
+      history = [],
+      balance
 
 
     $('.coefficientText').hide()
@@ -149,19 +151,41 @@
       $(".messeges").stop().animate({ scrollTop: $(".messeges")[0].scrollHeight}, 1000);
     }
     function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
+
+    checkIForHistory = ()=>{
+      let str=''
+      history.forEach( (i,iCount) => {
+        if(iCount==history.length-1){
+          if(Number(i)>5){
+            str += "<b style='color:#e300ff;'>"+i+"x</b>"
+          }else if(Number(i)>3 && Number(i)<5){
+            str += "<b style='color:green;'>"+i+"x</b>"
+          }else if(Number(i)>1 && Number(i)<3){
+            str += "<b style='color:blue;'>"+i+"x</b>"
+          }else if (Number(i)==0){
+            str += "<b style='color:red;'>"+i+"x</b>"
+          }
+        }else{
+          if(Number(i)>5){
+            str += "<b style='color:#e300ff;'>"+i+"x</b>, "
+          }else if(Number(i)>3 && Number(i)<5){
+            str += "<b style='color:green;'>"+i+"x</b>, "
+          }else if(Number(i)>1 && Number(i)<3){
+            str += "<b style='color:blue;'>"+i+"x</b>, "
+          }else if (Number(i)==0){
+            str += "<b style='color:red;'>"+i+"x</b>, "
+          }
+        }
+      })
+      return str
+    }
+
     function addHistoryText(){
 
       history.unshift(crashScore/100)
       history.splice(history.length-1,1)
-
-
       $('.history').html(()=>{
-        let str = ''
-        history.forEach( (i) => {
-          if(i==history[history.length-1])str += i + 'x'
-          else str += i + 'x, '
-        })
-        return str
+        return checkIForHistory()
       })
     }
 
@@ -189,14 +213,12 @@
           $('.messeges').append("<p style='background-color:"+entery.color+"' class='alert'><b>"+entery.username+"</b>: "+entery.msg+"</p>");
         })
 
+        balance = data.balance
+        $('.balance').html(balance)
+
         history = data.history
         $('.history').html(()=>{
-          let str = ''
-          history.forEach( (i) => {
-            if(i==history[history.length-1])str += i + 'x'
-            else str += i + 'x, '
-          })
-          return str
+          return checkIForHistory()
         })
 
       scrollButtom()
@@ -241,24 +263,36 @@
     socket.on('playersInformFromServer', data =>{
 
       if(data.length > 0){
+        let bank=0,
+            count = data.length
         $('.noPlayers').html('')
         $('.playersList').html(()=>{
           str=""
           data.forEach(item=>{
+            bank +=Number(item.rate)
             str+="<tr>"
             str += "<td>"+item.name+"</td>"
-            str += "<td>"+item.rate+"</td>"
-            str += "<td>"+item.coefficient+"</td>"
+            str += "<td>"+item.rate+"$</td>"
+            if(item.coefficient != ''){
+              str += "<td>"+item.coefficient+"x</td>"
+            }else{
+              str += "<td>"+item.coefficient+"</td>"
+            }
             str += "<td>"+item.winMoney+"</td>"
             str+="</tr>"
           })
           return str
         })
 
+        $('.count').html(count)
+        $('.bank').html(bank)
+
       }
       else{
         $('.playersList').html("")
-        $('.noPlayers').html("<span>Нет игроков в игре</span>")
+        $('.count').html('0')
+        $('.bank').html('0')
+        $('.noPlayers').html("<span>Нет игроков в игре...</span>")
       }
 
 
@@ -280,11 +314,13 @@
         timer()
         // $('.gameText').html('Reload...')
       }else if(!timerRun && properties.status == 'reload'){
+        statusGame = 'reload'
         $('.gameText').html('Reload...')
       }else if (!timerRun && properties.status == 'game'){
 
         statusGame = 'game'
         $('.btnStartStop').attr('disabled','')
+        $('.autoStop').attr('disabled','')
         $('.gameText').html('Game now...')
       }
 
@@ -307,7 +343,6 @@
       timeOnStart=1,
       gameActive = false,
       crashScore,
-      balance,
       rate,
       letTick = 75,
       letTickMinus = 0.1,
@@ -323,8 +358,8 @@
       speed = 0.001
 
     // GET BALANCE
-    localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
-    $('.balance').html(balance)
+    // localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
+
 
 
 
@@ -347,30 +382,25 @@
 
     let update = ()=>{
       if(gameActive){
-
-
         // endGame
         if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
           gameActive = false
           if(rate && statusPlayer == 'join'){
             statusFieldGame = 'lose'
-            $('.res').append('-'+rate + ', ')
-            localStorage.setItem('balance', balance)
+            $('.res').append('-'+rate + '$, ')
+            // localStorage.setItem('balance', balance)
+            socket.emit('updateBalance', {balance:balance, username:userName})
+
+
             statusPlayer = 'leave'
           }
-
           socket.emit('end',true)
           addHistoryText()
-
-          // setTimeout(()=>{timer()},2000)
-
-
         }else{
           if(timeOnStart>2.9){
-            y.options.max +=0.008
+            y.options.max +=0.005
           }
           index += speed
-
           data = [{
               data: generate(index),
               xaxis: 1,
@@ -393,6 +423,7 @@
       statusGame = 'reload'
       statusFieldGame = 'lose'
       $('.btnStartStop').removeAttr('disabled')
+      $('.autoStop').removeAttr('disabled')
       $('.coefficientText').hide()
       $('.timerText').show()
       time = 10
@@ -438,6 +469,7 @@
         $('.btnStartStop').removeAttr('disabled')
       }else{
         $('.btnStartStop').attr('disabled','')
+        $('.autoStop').attr('disabled','')
       }
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
@@ -447,7 +479,7 @@
       }else{
         letTick = 75
       }
-      console.log(letTick)
+      // console.log(letTick)
 
 
       timeOnStart=1
@@ -455,7 +487,6 @@
       statusGame = 'game'
       index = 0
       y.options.max =3
-      // crashScore = rnd(120,500)
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
 
@@ -473,21 +504,25 @@
        socket.emit('playerJoined', {name:userName, rate:rate})
        $('.balance').html(balance)
        $('.btnStartStop').attr('disabled','')
+       $('.autoStop').attr('disabled','')
      }
     }
 
     leaveGame = ()=>{
-      statusPlayer = 'leave'
-      $('.btnStartStop').html('Start')
-      let winMoney = timeOnStart.toFixed(2) * rate
-      balance = Math.round(balance + winMoney)
-      statusFieldGame = 'win'
-      socket.emit('playerLeaves', {name:userName, coefficient:timeOnStart.toFixed(2), winMoney:Math.round(winMoney)} )
-      $('.balance').html(balance)
-      $('.res').append(Math.round(winMoney) + '('+ timeOnStart.toFixed(2) + '), ')
-      $('.btnStartStop').attr('disabled','')
+      if(statusPlayer == 'join'){
+        statusPlayer = 'leave'
+        $('.btnStartStop').html('Start')
+        let winMoney = timeOnStart.toFixed(2) * rate
+        balance = Math.round(balance + winMoney)
+        statusFieldGame = 'win'
+        socket.emit('playerLeaves', {name:userName, coefficient:timeOnStart.toFixed(2), winMoney:Math.round(winMoney)} )
+        $('.balance').html(balance)
+        $('.res').append('+'+Math.round(winMoney) + '$ ('+ timeOnStart.toFixed(2) + '), ')
+        $('.btnStartStop').attr('disabled','')
+        $('.autoStop').attr('disabled','')
 
-      localStorage.setItem('balance', balance)
+        socket.emit('updateBalance', {balance:balance, username:userName})
+      }
     }
 
 

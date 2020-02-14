@@ -181,31 +181,13 @@ io.on('connection', socket => {
     console.log('user disconnected')
   })
 
-  socket.on('newPointsRes', data =>{
+  socket.on('updateBalance', data =>{
     // addPointsDB(data.username, data.balance)
 
     let sqlSELECT = "UPDATE users SET balance=? WHERE username=?";
     connection.query(sqlSELECT, [data.balance,data.username], function (err, result) {
       if (err) return console.log('ОШИБККА: ',err);
-        console.log(result.affectedRows + " record(s) updated");
-
-
-        let r = []
-        let sqlSELECT2 = "SELECT * FROM users ORDER BY balance ";
-        connection.query(sqlSELECT2, function (err, result) {
-          if (err) return console.log('ОШИБККА: ',err);
-          for (let i = 0; i < result.length; i++) {
-            if(result[i].balance > 0){
-              r.unshift({
-                username: result[i].username,
-                balance: result[i].balance
-              })
-            }
-          }
-          io.sockets.emit('setPointsRes', r);
-        });
-
-
+        console.log(result.affectedRows + " balance updated!");
 
     });
 
@@ -261,6 +243,7 @@ io.on('connection', socket => {
     if(online.length > maxOnline){
       addMaxOnlineDB(online.length)
     }
+
     let usersOn = []
     for (let i = 0; i < online.length; i++) {
       usersOn.push(online[i].username)
@@ -280,7 +263,18 @@ io.on('connection', socket => {
         })
       }
 
-      socket.emit('PFM', {m:m,history:properties.history});
+      let balance = 0
+      connection.query('SELECT * FROM users WHERE username=?', data.username, function (err, result) {
+        if (err) return console.log('ОШИБККА: ',err)
+        balance =result[0].balance
+
+
+
+        socket.emit('PFM', {m:m, history:properties.history, balance:balance});
+
+      })
+
+
     })
 
 
@@ -318,26 +312,14 @@ io.on('connection', socket => {
     io.sockets.emit('playersInformFromServer', properties.playersInform)
   })
 
-  // socket.on('start',data=>{
-  //   if(data){
-  //     activePlayers++
-  //   }
-  // })
-  //
-  // socket.on('end',data=>{
-  //   if(data){
-  //     properties.playersOnline++
-  //   }
-  //   console.log('activePlayers='+activePlayers)
-  //   console.log('properties.playersOnline='+properties.playersOnline)
-  // })
+
 
 })
 
 
 function regUserDB(username, password, color) {
 
-  let sqlINSERT = "INSERT INTO users(username, password, color, balance) VALUES (?, ?, ?,0)";
+  let sqlINSERT = "INSERT INTO users(username, password, color, balance) VALUES (?, ?, ?,50)";
   connection.query(sqlINSERT, [username, password, color], function (err, result) {
     if (err) return console.log('ОШИБККА: ',err);
     console.log("User registered");
@@ -394,7 +376,7 @@ function findUserDB(username, resolve) {
 function addMaxOnlineDB(onlineLength) {
 
   // let sqlINSERT = "INSERT INTO settings(maxOnline) VALUES(?)";
-  let sqlINSERT = "UPDATE settings SET maxOnline=?";
+  let sqlINSERT = "UPDATE settings SET maxOnline=? WHERE id=1";
   connection.query(sqlINSERT, onlineLength, (err, result) => {
     if (err) return console.log('ОШИБККА: ',err)
     console.log("Added maxOnline")
@@ -405,9 +387,23 @@ function addMaxOnlineDB(onlineLength) {
 
 function game (){
   let reload = true
-  function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
+  function rnd(min,max){
+    let rndLET =  Math.floor(Math.random() * (10- 0) + 0)
+    // console.log('rndLET='+rndLET);
+    if(rndLET==0){
+      return 0
+    }else if(rndLET==1 || rndLET==2 || rndLET==3){
+      return Math.floor(Math.random() * (max- min) + min)
+    }else if(rndLET==5 || rndLET==6){
+      return Math.floor(Math.random() * ((max/3)- min) + min)
+    }else{
+      return Math.floor(Math.random() * ((max/2)- min) + min)
+    }
+
+  }
+
   properties.status = 'start'
-  properties.crashScore = rnd(100,500)
+  properties.crashScore = rnd(100,1000)
 
   io.sockets.emit('startGameFromServer', properties)
   properties.status = 'game'
