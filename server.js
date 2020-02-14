@@ -133,7 +133,6 @@ let
   online = [],
   maxOnline,
   properties = {
-    // playersOnline:0,
     status:'off',
     crashScore:0,
     history:[],
@@ -319,27 +318,18 @@ io.on('connection', socket => {
     io.sockets.emit('playersInformFromServer', properties.playersInform)
   })
 
+  // socket.on('start',data=>{
+  //   if(data){
+  //     activePlayers++
+  //   }
+  // })
+  //
   // socket.on('end',data=>{
   //   if(data){
   //     properties.playersOnline++
   //   }
-  //   console.log('online.length='+online.length);
-  //   console.log('properties.playersOnline='+properties.playersOnline);
-  //   if(online.length == properties.playersOnline){
-  //     properties.status = 'reload'
-  //     io.sockets.emit('startGameFromServer', properties)
-  //     addHistoryText()
-  //     properties.playersInform= []
-  //     io.sockets.emit('playersInformFromServer', properties.playersInform)
-  //     setTimeout(()=>{
-  //       if(online.length > 0){
-  //         game()
-  //       }else{
-  //         properties.status = 'off'
-  //         console.log('statusGAME=' +  properties.status);
-  //       }
-  //     }, 13000)
-  //   }
+  //   console.log('activePlayers='+activePlayers)
+  //   console.log('properties.playersOnline='+properties.playersOnline)
   // })
 
 })
@@ -414,10 +404,11 @@ function addMaxOnlineDB(onlineLength) {
 }
 
 function game (){
+  let reload = true
   function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
   properties.status = 'start'
   properties.crashScore = rnd(100,500)
-  // properties.playersOnline = 0
+
   io.sockets.emit('startGameFromServer', properties)
   properties.status = 'game'
 
@@ -442,9 +433,9 @@ function game (){
             properties.status = 'off'
             console.log('statusGAME=' +  properties.status);
           }
-        }, 13000)
+        }, 11000)
 
-      },2000)
+      },3000)
     }else{                                                                 // IF GAME NOW
       letTick = letTick-0.1
       timeOnStart += 0.01

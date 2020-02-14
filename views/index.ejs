@@ -356,14 +356,15 @@
             statusPlayer = 'leave'
           }
 
+          socket.emit('end',true)
           addHistoryText()
-          // socket.emit('end',true)
+
           // setTimeout(()=>{timer()},2000)
 
 
         }else{
           if(timeOnStart>2.9){
-            y.options.max +=0.01
+            y.options.max +=0.008
           }
           index += speed
 
@@ -380,7 +381,7 @@
         }
 
       // setTimeout(()=>{update()},100)
-      webkitRequestAnimationFrame ( update )
+      requestAnimationFrame ( update )
 
       }
     }
@@ -391,7 +392,7 @@
       $('.btnStartStop').removeAttr('disabled')
       $('.coefficientText').hide()
       $('.timerText').show()
-      time = 12
+      time = 10
       $('.timer').html(time)
 
       timerTick = ()=>{
@@ -438,11 +439,12 @@
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
 
-      if($('.gameField').width()<500){
+      if(window.screen.width<500){
         letTick = 61.15
       }else{
         letTick = 75
       }
+      console.log(letTick)
 
 
       timeOnStart=1
@@ -452,7 +454,7 @@
       y.options.max =3
       // crashScore = rnd(120,500)
       console.log('crashScore=' + crashScore/100)
-
+      socket.emit('start', true)
 
 
       update()
