@@ -177,6 +177,7 @@ io.on('connection', socket => {
       }
       io.sockets.emit('connectDisconnectOnline', {username:user.username, value:'disconnected', online:usersOn})
       console.log('onlineDisconnectLength',online.length)
+      console.log(online)
     }
     console.log('user disconnected')
   })
@@ -415,7 +416,7 @@ function addMaxOnlineDB(onlineLength) {
 function game (){
   function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
   properties.status = 'start'
-  properties.crashScore = rnd(100,500)
+  properties.crashScore = rnd(100,200)
   // properties.playersOnline = 0
   io.sockets.emit('startGameFromServer', properties)
   properties.status = 'game'
