@@ -34,6 +34,51 @@
   </script>
 <body>
 
+
+  <!-- Модальное окно -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Статистика</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Игрок</th>
+                <th scope="col">Баланс</th>
+                <th scope="col">Макс кэф</th>
+                <th scope="col">Макс выигрыш</th>
+              </tr>
+            </thead>
+            <tbody class="statistics">
+              <!-- <tr>
+                <td>Admin</td>
+                <td>6666$</td>
+                <td>7.43x</td>
+                <td>14000$</td>
+              </tr> -->
+            </tbody>
+          </table>
+        </div>
+
+
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <div class="container-fluid">
     <div class="row">
 
@@ -70,7 +115,7 @@
               <button type="submit" class="btn btn-danger btnStartStop">Start</button>
             </form>
 
-            <span>Balance: <b class="balance"></b>$</span>
+            <h3><span>Balance: <b class="balance"></b>$</span></h3>
             <p>Results: <b class="res"></b></p>
 
           </div>
@@ -124,7 +169,7 @@
           <button type="submit" class="btn btn-danger" value="Send">Send</button>
         </form>
 
-
+        <a type="button" class="getStatistics" data-toggle="modal" data-target="#myModal">Общая статистика</a>
         <a class="logout" href="/logout"> LogOut</a>
         <a tabindex="0" class="online" role="button" data-container="body" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="">
           <span>Online:</span><b></b>
@@ -213,25 +258,29 @@
     const socket = io.connect()
     socket.emit('startSettings', {username:userName})
 
-  if(device=='pc'){
-    $('#messageForm').submit(e => {
-      e.preventDefault()
-      let msgInput = $('.inputMsg').val()
-      if(msgInput != ''){
-        socket.emit('newMessege', {username:userName, msg:$('.inputMsg').val(), color:userColor})
-        $('.inputMsg').val('')
-      }
+    $('.getStatistics').on('click', ()=>{
+      socket.emit('getStatistics')
     })
-  }else{
-    $('#messageFormMobile').submit(e => {
-      e.preventDefault()
-      let msgInput = $('.inputMsgMobile').val()
-      if(msgInput != ''){
-        socket.emit('newMessege', {username:userName, msg:$('.inputMsgMobile').val(), color:userColor})
-        $('.inputMsgMobile').val('')
-      }
-    })
-  }
+
+    if(device=='pc'){
+      $('#messageForm').submit(e => {
+        e.preventDefault()
+        let msgInput = $('.inputMsg').val()
+        if(msgInput != ''){
+          socket.emit('newMessege', {username:userName, msg:$('.inputMsg').val(), color:userColor})
+          $('.inputMsg').val('')
+        }
+      })
+    }else{
+      $('#messageFormMobile').submit(e => {
+        e.preventDefault()
+        let msgInput = $('.inputMsgMobile').val()
+        if(msgInput != ''){
+          socket.emit('newMessege', {username:userName, msg:$('.inputMsgMobile').val(), color:userColor})
+          $('.inputMsgMobile').val('')
+        }
+      })
+    }
 
 
     socket.on('PFM', data =>{
@@ -263,6 +312,26 @@
       }else{
           $('.messeges').prepend("<div style='background-color:"+data.color+"' class='alert'><b>"+data.username+"</b>: "+data.msg+"</div>")
       }
+    })
+
+    socket.on('addStatistics', data=>{
+
+      $('.statistics').html(()=>{
+        let str =''
+        data.u.forEach(item=>{
+          str+="<tr>"
+          str += "<td>"+item.username+"</td>"
+          str += "<td>"+item.balance+"$</td>"
+          str += "<td>"+item.maxCoefficient+"x</td>"
+          str += "<td>"+item.maxWinMoney+"$</td>"
+
+          str+="</tr>"
+        })
+        return str
+      })
+
+
+
     })
 
     socket.on('connectDisconnectOnline', data => {
@@ -410,7 +479,6 @@
             socket.emit('updateBalance', {balance:balance, username:userName})
             statusPlayer = 'leave'
           }
-          $('.coefficientText').attr("style", "display: block; color:#0606ab;")
           addHistoryText()
         }else{
           if(timeOnStart>2.9){
@@ -448,8 +516,9 @@
           setTimeout(timerTick,1000);
         }else{
           timerRun=false
+          $('.coefficientText').css('color', 'black')
+          $('.coefficientText').html('<span>Go!</span>')
           $('.timer').html('')
-          $('.coefficient').html('1.00')
           $('.timerText').hide()
           $('.coefficientText').show()
         }
@@ -507,10 +576,16 @@
       socket.emit('start', true)
       update()
 
-      if(crashScore!=0){
-        $('.coefficientText').attr("style", "display: block; color:#0606ab")
+      if(crashScore==0){
+        $('.coefficientText').html("<span style='color:red'>0x</span>")
+        // $('.coefficientText').css('color', 'red')
+        // $('.coefficient').html('0')
+      }else{
+        $('.coefficientText').html("<span class='coefficient'>0</span>x")
+        $('.coefficientText').css('color', '#0606ab')
       }
       setTimeout(tick, letTick);
+
     }
 
     joinGame = ()=>{
@@ -538,7 +613,7 @@
         $('.res').append('+'+Math.round(winMoney) + '$ ('+ timeOnStart.toFixed(2) + '), ')
         $('.btnStartStop').attr('disabled','')
         $('.autoStop').attr('disabled','')
-        socket.emit('updateBalance', {balance:balance, username:userName})
+        socket.emit('updateBalance', {balance:balance, coefficient:timeOnStart.toFixed(2), winMoney:winMoney, username:userName})
       }
     }
 
