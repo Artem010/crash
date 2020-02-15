@@ -134,24 +134,17 @@
 
 
   <script>
-
-
   $(function () {
-
     let
       timerRun=false,
       history = [],
       balance
-
-
     $('.coefficientText').hide()
     $('.timerText').hide()
-
     function scrollButtom() {
       $(".messeges").stop().animate({ scrollTop: $(".messeges")[0].scrollHeight}, 1000);
     }
     function rnd(min,max){return Math.floor(Math.random() * (max- min) + min)}
-
     checkIForHistory = ()=>{
       let str=''
       history.forEach( (i,iCount) => {
@@ -179,25 +172,19 @@
       })
       return str
     }
-
     function addHistoryText(){
-
       history.unshift(crashScore/100)
       history.splice(history.length-1,1)
       $('.history').html(()=>{
         return checkIForHistory()
       })
     }
-
     $('.online').popover({
         container: 'body',
         trigger: 'focus'
       })
-
     const socket = io.connect()
-
     socket.emit('startSettings', {username:userName})
-
     $('#messageForm').submit(e => {
       e.preventDefault()
       let msgInput = $('.inputMsg').val()
@@ -206,24 +193,18 @@
         $('.inputMsg').val('')
       }
     })
-
     socket.on('PFM', data =>{
-
         data.m.forEach(function (entery) {
           $('.messeges').append("<p style='background-color:"+entery.color+"' class='alert'><b>"+entery.username+"</b>: "+entery.msg+"</p>");
         })
-
         balance = data.balance
         $('.balance').html(balance)
-
         history = data.history
         $('.history').html(()=>{
           return checkIForHistory()
         })
-
       scrollButtom()
     })
-
     socket.on('Addmessage', data =>{
       // console.log('message: ' + msg);
       if(data.val == 'newRecord'){
@@ -235,14 +216,9 @@
       }
       scrollButtom()
     })
-
     socket.on('connectDisconnectOnline', data => {
-
         let online = data.online
-
         $('.online b').html(data.online.length)
-
-
           $('.online').attr('data-content', ()=>{
               let dataContent =''
               for (let i = 0; i < online.length; i++) {
@@ -252,16 +228,11 @@
               }
               return dataContent
             })
-
-
         // console.log(data.online)
-
       $('.messeges').append("<div class='alert text-center connectDisconnect'><b>"+data.username+"</b> "+ data.value+"</div>")
       scrollButtom()
     })
-
     socket.on('playersInformFromServer', data =>{
-
       if(data.length > 0){
         let bank=0,
             count = data.length
@@ -275,18 +246,17 @@
             str += "<td>"+item.rate+"$</td>"
             if(item.coefficient != ''){
               str += "<td>"+item.coefficient+"x</td>"
+              str += "<td>"+item.winMoney+"$</td>"
             }else{
               str += "<td>"+item.coefficient+"</td>"
+              str += "<td>"+item.winMoney+"</td>"
             }
-            str += "<td>"+item.winMoney+"</td>"
             str+="</tr>"
           })
           return str
         })
-
         $('.count').html(count)
         $('.bank').html(bank)
-
       }
       else{
         $('.playersList').html("")
@@ -294,11 +264,7 @@
         $('.bank').html('0')
         $('.noPlayers').html("<span>Нет игроков в игре...</span>")
       }
-
-
-
     })
-
     socket.on('startGameFromServer', properties => {
       // start = dataStart
       if(!timerRun && properties.status == 'start'){
@@ -317,20 +283,15 @@
         statusGame = 'reload'
         $('.gameText').html('Reload...')
       }else if (!timerRun && properties.status == 'game'){
-
         statusGame = 'game'
         $('.btnStartStop').attr('disabled','')
         $('.autoStop').attr('disabled','')
         $('.gameText').html('Game now...')
       }
-
     })
-
-
     function generate(start) {
         let res = [];
         let x, yLocal
-
         for (let i = 0; i <= 2; i++) {
             x = i
             yLocal=(timeOnStart*i)/2
@@ -338,7 +299,6 @@
         }
         return res;
     }
-
     let
       timeOnStart=1,
       gameActive = false,
@@ -356,17 +316,10 @@
       data = [],
       plot = $.plot("#placeholder", data,{label: 'string'}),
       speed = 0.001
-
     // GET BALANCE
     // localStorage.getItem('balance') ? balance = Math.round(Number(localStorage.getItem('balance'))) : balance = 50
-
-
-
-
     let y = plot.getAxes().yaxis;
     let x = plot.getAxes().xaxis;
-
-
     y.options.max = 3
     y.options.growOnly = false;
     y.options.autoScale = "none"
@@ -374,12 +327,6 @@
     x.options.showTickLabels = 'none';
     x.options.gridLines = 'true';
     x.options.ticks = 'null';
-
-
-
-
-
-
     let update = ()=>{
       if(gameActive){
         // endGame
@@ -390,8 +337,6 @@
             $('.res').append('-'+rate + '$, ')
             // localStorage.setItem('balance', balance)
             socket.emit('updateBalance', {balance:balance, username:userName})
-
-
             statusPlayer = 'leave'
           }
           socket.emit('end',true)
@@ -407,18 +352,14 @@
               yaxis:1,
               lines: { show: true},
           }];
-
           plot.setData(data)
           plot.setupGrid(true)
           plot.draw()
         }
-
       // setTimeout(()=>{update()},100)
       requestAnimationFrame ( update )
-
       }
     }
-
     timer = ()=>{
       statusGame = 'reload'
       statusFieldGame = 'lose'
@@ -428,7 +369,6 @@
       $('.timerText').show()
       time = 10
       $('.timer').html(time)
-
       timerTick = ()=>{
         if(time > 1){
           time -= 1
@@ -442,11 +382,8 @@
           $('.coefficientText').show()
         }
       }
-
       setTimeout(timerTick,1000);
-
     }
-
     tick = ()=>{
       if(gameActive){
         if(timeOnStart >= Number(autoStop) && statusPlayer=='join' ){
@@ -457,12 +394,10 @@
         letTick = letTick-letTickMinus
         timeOnStart += 0.01
         $('.coefficient').html(timeOnStart.toFixed(2))
-
       }else{
         $('.btnStartStop').html('Start')
       }
     }
-
   let startGame = ()=>{
       // console.log('statusPlayer='+statusPlayer)
       if(statusPlayer == 'join'){
@@ -473,15 +408,12 @@
       }
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
-
       if(window.screen.width<500){
         letTick = 61.15
       }else{
         letTick = 75
       }
       // console.log(letTick)
-
-
       timeOnStart=1
       gameActive = true
       statusGame = 'game'
@@ -489,12 +421,9 @@
       y.options.max =3
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
-
-
       update()
       setTimeout(tick, letTick);
     }
-
     joinGame = ()=>{
      if (statusGame == 'reload'){
        statusPlayer = 'join'
@@ -507,7 +436,6 @@
        $('.autoStop').attr('disabled','')
      }
     }
-
     leaveGame = ()=>{
       if(statusPlayer == 'join'){
         statusPlayer = 'leave'
@@ -520,12 +448,9 @@
         $('.res').append('+'+Math.round(winMoney) + '$ ('+ timeOnStart.toFixed(2) + '), ')
         $('.btnStartStop').attr('disabled','')
         $('.autoStop').attr('disabled','')
-
         socket.emit('updateBalance', {balance:balance, username:userName})
       }
     }
-
-
     $('#formGame').submit(e=>{
       e.preventDefault()
       if(!gameActive && (statusGame=='reload') && ($('.rateInput').val() != '') && ($('.rateInput').val() <= balance) && ($('.rateInput').val() != 0 && ($('.btnStartStop').text() == 'Start'))){
@@ -539,17 +464,9 @@
         joinGame()
       }else if(statusGame == 'game' && $('.btnStartStop').text() == 'Stop'){
         leaveGame()
-
       }
-
     })
-
-
-
   })
-
-
-
   </script>
 </body>
 </html>
