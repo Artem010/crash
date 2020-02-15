@@ -191,39 +191,14 @@ io.on('connection', socket => {
 
     });
 
-
-
-
-
   })
 
-  socket.on('updatedPointsRes', data =>{
-    let r = []
-    let sqlSELECT2 = "SELECT * FROM users ORDER BY balance ";
-    connection.query(sqlSELECT2, function (err, result) {
-      if (err) return console.log('ОШИБККА: ',err);
-      for (let i = 0; i < result.length; i++) {
-        if(result[i].balance > 0){
-          r.unshift({
-            username: result[i].username,
-            balance: result[i].balance
-          })
-        }
-      }
-      io.sockets.emit('setPointsRes', r);
-    });
-  })
 
   socket.on('newMessege', data =>{
     addMsgDB(data.username, data.msg)
     io.sockets.emit('Addmessage', {color:data.color, username:data.username, msg:data.msg})
   })
 
-  socket.on('newMessegePoints', data =>{
-    if(data.val){
-      io.sockets.emit('Addmessage', {username:data.username, msg:data.msg, val:data.val})
-    }
-  })
 
   socket.on('startSettings', data =>{
 
@@ -234,7 +209,19 @@ io.on('connection', socket => {
 
 
     if( online.length > 0 && properties.status == 'off' ){
-      game()
+      // setTimeout(()=>{game()}, 11000)
+
+      properties.status = 'reload'
+      io.sockets.emit('startGameFromServer', properties)
+      addHistoryText()
+      properties.playersInform= []
+      io.sockets.emit('playersInformFromServer', properties.playersInform)
+      setTimeout(()=>{
+          game()
+      }, 11000)
+
+
+
     }else{
       socket.emit('startGameFromServer', properties)
     }
@@ -325,14 +312,6 @@ function regUserDB(username, password, color) {
     console.log("User registered");
   });
 
-}
-
-function addPointsDB(username, balance) {
-  // let sqlSELECT = "UPDATE users SET balance=? WHERE name=?";
-  // connection.query(sqlSELECT, [balance,name], function (err, result) {
-  //   if (err) return console.log('ОШИБККА: ',err);
-  //     console.log(result.affectedRows + " record(s) updated");
-  // });
 }
 
 function addMsgDB(username, msg) {
@@ -432,6 +411,7 @@ function game (){
         }, 11000)
 
       },3000)
+
     }else{                                                                 // IF GAME NOW
       letTick = letTick-0.1
       timeOnStart += 0.01
