@@ -489,6 +489,7 @@
         $('.btnStartStop').attr('disabled','')
         $('.autoStop').attr('disabled','')
       }
+      $('.coefficientText').css('color', '#0606ab')
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
       if(window.screen.width<500){
@@ -505,7 +506,6 @@
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
       update()
-      $('.coefficientText').css('color', '#0606ab')
       if(crashScore==0){
           $('.coefficientText').html("<span style='color:red'>0x</span>")
       }
