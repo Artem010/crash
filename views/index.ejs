@@ -467,12 +467,12 @@
         letTick = letTick-letTickMinus
         timeOnStart += 0.01
 
-        if(timeOnStart>5){
-          $('.coefficientText').css('color', '#e300ff')
+        if(timeOnStart>1 && timeOnStart<3){
+          $('.coefficientText').css('color', '#0606ab')
         }else if(timeOnStart>3 && timeOnStart<5){
           $('.coefficientText').css('color', 'green')
-        }else if(timeOnStart>1 && timeOnStart<3){
-          $('.coefficientText').css('color', '#0606ab')
+        }else if(timeOnStart>5){
+          $('.coefficientText').css('color', '#e300ff')
         }
 
         $('.coefficient').html(timeOnStart.toFixed(2))
@@ -509,6 +509,7 @@
       if(crashScore==0){
           $('.coefficientText').html("<span style='color:red'>0x</span>")
       }
+      $('.coefficientText').css('color', '#0606ab')
       setTimeout(tick, letTick);
     }
 
