@@ -1,7 +1,6 @@
 @media (max-width: 991px) {
 
   .messeges{
-    max-height: 30vh;
     height: 30vh;
   }
   #messageFormMobile{
@@ -21,7 +20,8 @@
 }
 
 .messeges{
-  max-height: calc(100vh - 5rem);
+  width: 100%;
+  max-height: 10vh;
   overflow-y: auto;
   word-break: break-all;
   /* overflow-y: scroll; */
@@ -32,9 +32,7 @@
 #messageForm{
   display: flex;
 }
-#msgText{
-  /* width: 42vw; */
-}
+
 .helloUser{
   position: absolute;
 }
@@ -50,7 +48,7 @@
 }
 .logout{
   /* position: absolute; */
-  float: right;
+  float: left;
   z-index: 100
 }
 .connectDisconnect{
