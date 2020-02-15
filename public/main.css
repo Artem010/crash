@@ -33,6 +33,11 @@
 .helloUser{
   position: absolute;
 }
+.logout{
+  /* position: absolute; */
+  float: right;
+  z-index: 100
+}
 .online{
   float: right;
   cursor: pointer;
@@ -42,11 +47,6 @@
 }
 .helloDiv{
 
-}
-.logout{
-  /* position: absolute; */
-  float: right;
-  z-index: 100
 }
 .connectDisconnect{
   padding: 0;
@@ -59,4 +59,8 @@
 .myResult{
   color: black;
   font-weight: 700;
+}
+.link{
+  color:blue;
+  cursor:pointer;
 }

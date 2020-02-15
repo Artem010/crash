@@ -117,6 +117,7 @@
 
             <h3><span>Balance: <b class="balance"></b>$</span></h3>
             <p>Results: <b class="res"></b></p>
+            <span class='link bonus'>Получить бонус (каждые 3 минуты)</span>
 
           </div>
 
@@ -169,7 +170,7 @@
           <button type="submit" class="btn btn-danger" value="Send">Send</button>
         </form>
 
-        <a type="button" class="getStatistics" data-toggle="modal" data-target="#myModal">Общая статистика</a>
+        <a class="getStatistics" data-toggle="modal" data-target="#myModal"><span class="link">Общая статистика</span></a>
         <a class="logout" href="/logout"> LogOut</a>
         <a tabindex="0" class="online" role="button" data-container="body" data-trigger="focus" data-toggle="popover" data-placement="top" data-content="">
           <span>Online:</span><b></b>
@@ -228,18 +229,11 @@
 
 
     function addHistoryText(){
-
-
       history.unshift(crashScore/100)
       history.splice(history.length-1,1)
-
-
       $('.history').html(()=>{
         return checkIForHistory()
       })
-
-
-
     }
 
 
@@ -260,6 +254,10 @@
 
     $('.getStatistics').on('click', ()=>{
       socket.emit('getStatistics')
+    })
+
+    $('.bonus').on('click', ()=>{
+      socket.emit('getBonus', {username:userName})
     })
 
     if(device=='pc'){
@@ -285,7 +283,6 @@
 
     socket.on('PFM', data =>{
         if(device =='phone'){
-          console.log(data.m[0].color)
           for (let i = data.m.length-1; i > 0; i--) {
             $('.messeges').append("<p style='background-color:"+data.m[i].color+"' class='alert'><b>"+data.m[i].username+"</b>: "+data.m[i].msg+"</p>");
           }
@@ -332,6 +329,20 @@
 
 
 
+    })
+
+    socket.on('addBonus', data=>{
+      if(data.bonus == 'add'){
+        balance+=3
+        $('.balance').html(balance)
+        socket.emit('updateBalance', {balance:balance, username:userName})
+        // console.log('BALANCE+3')
+        $('.bonus').hide()
+        setTimeout(()=>{$('.bonus').show()},1000*180)
+      }else{
+        $('.bonus').hide()
+        setTimeout(()=>{$('.bonus').show()},1000*180)
+      }
     })
 
     socket.on('connectDisconnectOnline', data => {
@@ -567,15 +578,6 @@
         letTick = 75
       }
       // console.log(letTick)
-      timeOnStart=1
-      gameActive = true
-      statusGame = 'game'
-      index = 0
-      y.options.max =3
-      console.log('crashScore=' + crashScore/100)
-      socket.emit('start', true)
-      update()
-
       if(crashScore==0){
         $('.coefficientText').html("<span style='color:red'>0x</span>")
         // $('.coefficientText').css('color', 'red')
@@ -584,6 +586,15 @@
         $('.coefficientText').html("<span class='coefficient'>0</span>x")
         $('.coefficientText').css('color', '#0606ab')
       }
+      timeOnStart=1
+      gameActive = true
+      statusGame = 'game'
+      index = 0
+      y.options.max =3
+      // console.log('crashScore=' + crashScore/100)
+      socket.emit('start', true)
+      update()
+
       setTimeout(tick, letTick);
 
     }

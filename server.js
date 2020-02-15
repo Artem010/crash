@@ -191,24 +191,23 @@ io.on('connection', socket => {
 //GET STATISTICS FOR USER
     connection.query('SELECT * FROM users WHERE username=?', data.username, (err, result) => {
       if (err) return console.log('ErrorGetHistory: ',err);
-      maxCoefficient= result[0].maxCoefficient
-      maxWinMoney= result[0].maxWinMoney
-      console.log(maxCoefficient)
-      console.log(data.coefficient)
 
-      if(Number(data.coefficient) > maxCoefficient){
-        maxCoefficient = data.coefficient
-      }
-      if(Number(data.winMoney) > maxWinMoney){
-        maXwinMoney=data.winMoney
-      }
+        maxCoefficient= result[0].maxCoefficient
+        maxWinMoney= result[0].maxWinMoney
 
-      let sqlSELECT = "UPDATE users SET balance=?,maxCoefficient=?,maXwinMoney=? WHERE username=?";
-      connection.query(sqlSELECT, [data.balance,maxCoefficient,maXwinMoney,data.username], function (err, result) {
-        if (err) return console.log('ErrorSetBalanceOfUser: ',err);
-        console.log("Balance updated!");
+        if(Number(data.coefficient) > maxCoefficient){
+          maxCoefficient = data.coefficient
+        }
+        if(Number(data.winMoney) > maxWinMoney){
+          maxWinMoney=data.winMoney
+        }
 
-      });
+        let sqlSELECT = "UPDATE users SET balance=?,maxCoefficient=?,maxWinMoney=? WHERE username=?";
+        connection.query(sqlSELECT, [data.balance,maxCoefficient,maxWinMoney,data.username], function (err, result) {
+          if (err) return console.log('ErrorSetBalanceOfUser: ',err);
+          // console.log("Balance updated!");
+
+        });
 
 
     })
@@ -346,16 +345,43 @@ io.on('connection', socket => {
     })
   })
 
+  socket.on('getBonus', data=>{
+    let
+      nowDate = Date.now(),
+      oldDate = 0
+
+    connection.query('SELECT * FROM users WHERE username=?', data.username, (err, result) => {
+      if (err) return console.log('ErrorGetHistory: ',err);
+
+      oldDate = Number(result[0].oldDate)
+
+      if (((nowDate-oldDate) / (1000 * 60)).toFixed(0) >=3){
+        connection.query('UPDATE users SET oldDate=? WHERE username=?', [nowDate,data.username], (err, result) => {
+          if (err) return console.log('ErrorUpdateOldDate: ',err)
+        })
+
+        socket.emit('addBonus', {bonus:'add'})
+      }else{
+        socket.emit('addBonus', {bonus:'notNow'})
+      }
+      // console.log(u);
+
+
+
+    })
+
+
+  })
 
 })
 
 
 function regUserDB(username, password, color) {
 
-  let sqlINSERT = "INSERT INTO users(username, password, color, balance, maxCoefficient, maxWinMoney) VALUES (?, ?, ?,50, 0, 0)";
+  let sqlINSERT = "INSERT INTO users(username, password, color, balance, maxCoefficient, maxWinMoney, oldDate) VALUES (?, ?, ?,50, 0, 0, 0)";
   connection.query(sqlINSERT, [username, password, color], function (err, result) {
     if (err) return console.log('ErrorRegNewUser: ',err);
-    // console.log("User registered");
+    console.log("User registered");
   });
 
 }
