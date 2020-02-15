@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="main.css">
   <link href="crash.css" rel="stylesheet" type="text/css">
-  <title>Runner by Artem</title>
+  <title>Crash by Artem</title>
 </head>
   <script type="text/javascript">
       const userName = "<%= username %>"
@@ -489,7 +489,7 @@
         $('.btnStartStop').attr('disabled','')
         $('.autoStop').attr('disabled','')
       }
-      $('.coefficientText').css('color', '#0606ab')
+
       $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
       if(window.screen.width<500){
@@ -506,7 +506,10 @@
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
       update()
-      if(crashScore==0){
+
+      if(crashScore!=0){
+        $('.coefficientText').attr("style", "display: block; color:#0606ab")
+      }else{
           $('.coefficientText').html("<span style='color:red'>0x</span>")
       }
       setTimeout(tick, letTick);
