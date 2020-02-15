@@ -147,8 +147,8 @@
       balance,
       device
 
-    $('.coefficientText').hide()
-    $('.timerText').hide()
+    // $('.coefficientText').hide()
+    // $('.timerText').hide()
     function scrollButtom() {
       $(".messeges").stop().animate({ scrollTop: $(".messeges")[0].scrollHeight}, 1000);
     }
@@ -180,13 +180,25 @@
       })
       return str
     }
+
+
     function addHistoryText(){
+
+
       history.unshift(crashScore/100)
       history.splice(history.length-1,1)
+
+
       $('.history').html(()=>{
         return checkIForHistory()
       })
+
+
+
     }
+
+
+
     $('.online').popover({
         container: 'body',
         trigger: 'focus'
@@ -317,14 +329,22 @@
         time = 0
         crashScore = properties.crashScore
         startGame()
-      }else if((statusGame=='game' || statusGame=='off') && properties.status == 'reload'){
+      }else if(statusGame=='game' && properties.status == 'reload'){
         $('.gameText').hide()
         statusGame = 'reload'
+        history = properties.history
+        $('.history').html(()=>{
+          return checkIForHistory()
+        })
         timer()
         // $('.gameText').html('Reload...')
       }else if(!timerRun && properties.status == 'reload'){
         statusGame = 'reload'
         $('.gameText').html('Reload...')
+      }else if(properties.status == 'startNewGame'){
+        $('.gameText').hide()
+        statusGame = 'reload'
+        timer()
       }else if (!timerRun && properties.status == 'game'){
         statusGame = 'game'
         $('.btnStartStop').attr('disabled','')
@@ -446,6 +466,15 @@
         speed+=timeOnStart
         letTick = letTick-letTickMinus
         timeOnStart += 0.01
+
+        if(timeOnStart>5){
+          $('.coefficientText').css('color', '#e300ff')
+        }else if(timeOnStart>3 && timeOnStart<5){
+          $('.coefficientText').css('color', 'green')
+        }else if(timeOnStart>1 && timeOnStart<3){
+          $('.coefficientText').css('color', '#0606ab')
+        }
+
         $('.coefficient').html(timeOnStart.toFixed(2))
       }else{
         $('.btnStartStop').html('Start')
@@ -476,6 +505,10 @@
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
       update()
+      // crashScore=0
+      if(crashScore==0){
+          $('.coefficientText').html("<span style='color:red'>0x</span>")
+      }
       setTimeout(tick, letTick);
     }
 

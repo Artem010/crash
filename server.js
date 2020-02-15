@@ -211,7 +211,7 @@ io.on('connection', socket => {
     if( online.length > 0 && properties.status == 'off' ){
       // setTimeout(()=>{game()}, 11000)
 
-      properties.status = 'reload'
+      properties.status = 'startNewGame'
       io.sockets.emit('startGameFromServer', properties)
       addHistoryText()
       properties.playersInform= []
@@ -397,8 +397,8 @@ function game (){
 
       setTimeout(()=>{
         properties.status = 'reload'
-        io.sockets.emit('startGameFromServer', properties)
         addHistoryText()
+        io.sockets.emit('startGameFromServer', properties)
         properties.playersInform= []
         io.sockets.emit('playersInformFromServer', properties.playersInform)
         setTimeout(()=>{

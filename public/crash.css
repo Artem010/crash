@@ -1,3 +1,7 @@
+.coefficientText,
+.timerText{
+  display: none;
+}
 
 .history{
   margin: .5em 0 .5em 0;
