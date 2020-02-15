@@ -399,7 +399,7 @@
 
 
 
-    let update = ()=>{
+    update = ()=>{
       if(gameActive){
         // endGame
         if(gameActive && (Number(timeOnStart.toFixed(2)) >= crashScore/100)){
@@ -410,7 +410,7 @@
             socket.emit('updateBalance', {balance:balance, username:userName})
             statusPlayer = 'leave'
           }
-          socket.emit('end',true)
+          $('.coefficientText').attr("style", "display: block; color:#0606ab;")
           addHistoryText()
         }else{
           if(timeOnStart>2.9){
@@ -509,8 +509,6 @@
 
       if(crashScore!=0){
         $('.coefficientText').attr("style", "display: block; color:#0606ab")
-      }else{
-          $('.coefficientText').html("<span style='color:red'>0x</span>")
       }
       setTimeout(tick, letTick);
     }
