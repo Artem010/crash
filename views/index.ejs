@@ -22,7 +22,7 @@
 
 
 
-  <link rel="icon" href="runnerIcon.ico" type="image/x-icon">
+  <link rel="icon" href="up.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="main.css">
   <link href="crash.css" rel="stylesheet" type="text/css">
@@ -505,11 +505,10 @@
       console.log('crashScore=' + crashScore/100)
       socket.emit('start', true)
       update()
-      // crashScore=0
+      $('.coefficientText').css('color', '#0606ab')
       if(crashScore==0){
           $('.coefficientText').html("<span style='color:red'>0x</span>")
       }
-      $('.coefficientText').css('color', '#0606ab')
       setTimeout(tick, letTick);
     }
 
