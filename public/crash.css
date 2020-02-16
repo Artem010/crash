@@ -55,3 +55,6 @@
 table th{
   border-top: none!important;
 }
+.goText{
+  display: none;
+}

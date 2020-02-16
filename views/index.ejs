@@ -85,6 +85,7 @@
       <div class=" gameField col-lg-4">
         <div class=" text-center history"></div>
         <div class="cnv">
+          <h1 class="timex goText"><span>Go!</span></h1>
           <h1 class="timex coefficientText"><span class="coefficient"></span>x</h1>
           <h1 class="timex timerText"><span class="timer"></span>сек.</h1>
           <h1 class="timex gameText"></h1>
@@ -333,7 +334,7 @@
 
     socket.on('addBonus', data=>{
       if(data.bonus == 'add'){
-        balance+=3
+        balance+=10
         $('.balance').html(balance)
         socket.emit('updateBalance', {balance:balance, username:userName})
         // console.log('BALANCE+3')
@@ -405,6 +406,7 @@
       if(!timerRun && properties.status == 'start'){
         $('.timerText').hide()
         $('.gameText').hide()
+        $('.goText').hide()
         $('.coefficientText').show()
         time = 0
         crashScore = properties.crashScore
@@ -527,11 +529,13 @@
           setTimeout(timerTick,1000);
         }else{
           timerRun=false
-          $('.coefficientText').css('color', 'black')
-          $('.coefficientText').html('<span>Go!</span>')
-          $('.timer').html('')
-          $('.timerText').hide()
-          $('.coefficientText').show()
+          if(statusGame == 'reload'){
+            $('.goText').show()
+            $('.timer').html('')
+            $('.timerText').hide()
+            $('.coefficient').html('1.00')
+            $('.coefficientText').css('color', '#0606ab')
+          }
         }
       }
       setTimeout(timerTick,1000);
@@ -570,8 +574,8 @@
         $('.autoStop').attr('disabled','')
       }
 
-      $('.coefficientText').show()
       $('.btnsPanel .alert').hide()
+
       if(window.screen.width<500){
         letTick = 61.15
       }else{
@@ -579,20 +583,19 @@
       }
       // console.log(letTick)
       if(crashScore==0){
-        $('.coefficientText').html("<span style='color:red'>0x</span>")
-        // $('.coefficientText').css('color', 'red')
-        // $('.coefficient').html('0')
-      }else{
-        $('.coefficientText').html("<span class='coefficient'>0</span>x")
-        $('.coefficientText').css('color', '#0606ab')
+        $('.coefficient').html('0')
+        $('.coefficientText').css("color","red")
       }
+
+
       timeOnStart=1
       gameActive = true
       statusGame = 'game'
       index = 0
+      $('.goText').hide()
+      $('.coefficientText').show()
       y.options.max =3
       // console.log('crashScore=' + crashScore/100)
-      socket.emit('start', true)
       update()
 
       setTimeout(tick, letTick);
