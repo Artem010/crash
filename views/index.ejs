@@ -58,14 +58,15 @@
               </tr>
             </thead>
             <tbody class="statistics">
-              <!-- <tr>
-                <td>Admin</td>
+              <tr>
+                <!-- <td>Admin</td>
                 <td>6666$</td>
                 <td>7.43x</td>
-                <td>14000$</td>
-              </tr> -->
+                <td>14000$</td> -->
+              </tr>
             </tbody>
           </table>
+          <div class="text-center statisticsBottom"></div>
         </div>
 
 
@@ -313,20 +314,37 @@
     })
 
     socket.on('addStatistics', data=>{
+      // numPlazers
+      // bankPlaysers
 
       $('.statistics').html(()=>{
         let str =''
         data.u.forEach(item=>{
           str+="<tr>"
           str += "<td>"+item.username+"</td>"
-          str += "<td>"+item.balance+"$</td>"
+          if(item.balance > 1000){
+            str += "<td>$"+(item.balance/1000).toFixed(1)+"K</td>"
+          }else{
+            str += "<td>"+item.balance+"$</td>"
+          }
           str += "<td>"+item.maxCoefficient+"x</td>"
-          str += "<td>"+item.maxWinMoney+"$</td>"
+          if(item.maxWinMoney > 1000){
+            str += "<td>$"+(item.maxWinMoney/1000).toFixed(1)+"K</td>"
+          }else{
+            str += "<td>"+item.maxWinMoney+"$</td>"
+          }
 
           str+="</tr>"
         })
         return str
       })
+      if(data.bankPlaysers > 1000){
+        let bp = data.bankPlaysers/1000
+        $('.statisticsBottom').append("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+bp.toFixed(1)+"K</b></span>")
+      }else{
+        $('.statisticsBottom').append("<span style='float:left'>Всего пользователей:"+data.numPlayers+"</span><span style='float:right'>Банк: <b>"+data.bankPlaysers+"$</b></span>")
+      }
+      // $('.statistics').html("<td>Всего пользователей 25</td><td></td><td></td>  <td>Банк 1000432$</td>")
 
 
 

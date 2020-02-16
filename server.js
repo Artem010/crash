@@ -325,9 +325,10 @@ io.on('connection', socket => {
     let u = []
     connection.query('SELECT * FROM users ORDER BY balance DESC', (err, result) => {
       if (err) return console.log('ErrorGetHistory: ',err);
-
+      let bankPlaysers = 0
       for (let i = 0; i < result.length; i++) {
         if(result[i].maxCoefficient > 0 && result[i].balance>0){
+          bankPlaysers += result[i].balance
           let item = {
             username:result[i].username,
             balance:result[i].balance,
@@ -338,7 +339,7 @@ io.on('connection', socket => {
         }
       }
       // console.log(u);
-      socket.emit('addStatistics', {u:u})
+      socket.emit('addStatistics', {u:u, numPlayers:result.length, bankPlaysers:bankPlaysers})
 
 
 
