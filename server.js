@@ -457,8 +457,6 @@ function game (){
       return Math.floor(Math.random() * (max- min) + min)
     }else if(rndLET==5 || rndLET==6){
       return Math.floor(Math.random() * ((max/3)- min) + min)
-    }else if (rndLET==7 || rndLET==8){
-      return Math.floor(Math.random() * ((1500)- min) + min)
     }else if (rndLET==9){
       return Math.floor(Math.random() * ((3000)- min) + min)
     }else{
