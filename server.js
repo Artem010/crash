@@ -440,7 +440,17 @@ function game (){
   let reload = true
   function rnd(min,max){
     let rndLET =  Math.floor(Math.random() * (10- 0) + 0)
-    // console.log('rndLET='+rndLET);
+
+    // if(rndLET==0){
+    //   return 0
+    // }else if(rndLET==1 || rndLET==2 || rndLET==3){
+    //   return Math.floor(Math.random() * (max- min) + min)
+    // }else if(rndLET==5 || rndLET==6){
+    //   return Math.floor(Math.random() * ((max/3)- min) + min)
+    // }else {
+    //   return Math.floor(Math.random() * ((max/2)- min) + min)
+    // }
+
     if(rndLET==0){
       return 0
     }else if(rndLET==1 || rndLET==2 || rndLET==3){
@@ -451,7 +461,11 @@ function game (){
       return Math.floor(Math.random() * ((1500)- min) + min)
     }else if (rndLET==9){
       return Math.floor(Math.random() * ((3000)- min) + min)
+    }else{
+      return Math.floor(Math.random() * ((max/2)- min) + min)
     }
+
+
 
   }
 
