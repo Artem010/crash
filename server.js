@@ -327,7 +327,7 @@ io.on('connection', socket => {
       if (err) return console.log('ErrorGetHistory: ',err);
 
       for (let i = 0; i < result.length; i++) {
-        if(result[i].maxCoefficient >0 ){
+        if(result[i].maxCoefficient > 0 && result[i].balance>0){
           let item = {
             username:result[i].username,
             balance:result[i].balance,
@@ -440,16 +440,6 @@ function game (){
   let reload = true
   function rnd(min,max){
     let rndLET =  Math.floor(Math.random() * (10- 0) + 0)
-
-    // if(rndLET==0){
-    //   return 0
-    // }else if(rndLET==1 || rndLET==2 || rndLET==3){
-    //   return Math.floor(Math.random() * (max- min) + min)
-    // }else if(rndLET==5 || rndLET==6){
-    //   return Math.floor(Math.random() * ((max/3)- min) + min)
-    // }else {
-    //   return Math.floor(Math.random() * ((max/2)- min) + min)
-    // }
 
     if(rndLET==0){
       return 0
