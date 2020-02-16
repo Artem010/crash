@@ -483,7 +483,7 @@ function game (){
 
       setTimeout(()=>{
         properties.status = 'reload'
-        addHistoryText()
+        addHistoryText() 
         io.sockets.emit('startGameFromServer', properties)
         properties.playersInform= []
         io.sockets.emit('playersInformFromServer', properties.playersInform)
