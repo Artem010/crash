@@ -463,7 +463,7 @@ function game (){
       return Math.floor(Math.random() * ((max/2)- min) + min)
     }
 
- 
+
 
   }
 
