@@ -463,7 +463,7 @@ function game (){
       return Math.floor(Math.random() * ((max/2)- min) + min)
     }
 
-
+ 
 
   }
 
@@ -483,7 +483,7 @@ function game (){
 
       setTimeout(()=>{
         properties.status = 'reload'
-        addHistoryText() 
+        addHistoryText()
         io.sockets.emit('startGameFromServer', properties)
         properties.playersInform= []
         io.sockets.emit('playersInformFromServer', properties.playersInform)
