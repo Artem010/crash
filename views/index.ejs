@@ -340,9 +340,9 @@
       })
       if(data.bankPlaysers > 1000){
         let bp = data.bankPlaysers/1000
-        $('.statisticsBottom').append("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+bp.toFixed(1)+"K</b></span>")
+        $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+bp.toFixed(1)+"K</b></span>")
       }else{
-        $('.statisticsBottom').append("<span style='float:left'>Всего пользователей:"+data.numPlayers+"</span><span style='float:right'>Банк: <b>"+data.bankPlaysers+"$</b></span>")
+        $('.statisticsBottom').html("<span style='float:left'>Всего пользователей:"+data.numPlayers+"</span><span style='float:right'>Банк: <b>"+data.bankPlaysers+"$</b></span>")
       }
       // $('.statistics').html("<td>Всего пользователей 25</td><td></td><td></td>  <td>Банк 1000432$</td>")
 
