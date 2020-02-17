@@ -409,9 +409,9 @@
             str += "<td>"+item.name+"</td>"
             if(item.rate > 1000){
               if(item.rate > 1000000){
-                str += "<td>"+(item.rate/1000000).toFixed(1)+"$</td>"
+                str += "<td>$"+(item.rate/1000000).toFixed(1)+"M</td>"
               }else{
-                str += "<td>"+(item.rate/1000).toFixed(1)+"$</td>"
+                str += "<td>$"+(item.rate/1000).toFixed(1)+"K</td>"
               }
             }else{
               str += "<td>"+item.rate+"$</td>"
@@ -421,9 +421,9 @@
 
               if(item.winMoney > 1000){
                 if(item.winMoney > 1000000){
-                  str += "<td>"+(item.winMoney/1000000).toFixed(1)+"$</td>"
+                  str += "<td>$"+(item.winMoney/1000000).toFixed(1)+"M</td>"
                 }else{
-                  str += "<td>"+(item.winMoney/1000).toFixed(1)+"$</td>"
+                  str += "<td>$"+(item.winMoney/1000).toFixed(1)+"K</td>"
                 }
               }else{
                 str += "<td>"+item.winMoney+"$</td>"
