@@ -323,13 +323,21 @@
           str+="<tr>"
           str += "<td>"+item.username+"</td>"
           if(item.balance > 1000){
-            str += "<td>$"+(item.balance/1000).toFixed(1)+"K</td>"
+            if(item.balance > 1000000){
+              str += "<td>$"+(item.balance/1000000).toFixed(1)+"M</td>"
+            }else{
+              str += "<td>$"+(item.balance/1000).toFixed(1)+"K</td>"
+            }
           }else{
             str += "<td>"+item.balance+"$</td>"
           }
           str += "<td>"+item.maxCoefficient+"x</td>"
           if(item.maxWinMoney > 1000){
-            str += "<td>$"+(item.maxWinMoney/1000).toFixed(1)+"K</td>"
+            if(item.maxCoefficient > 1000000){
+              str += "<td>$"+(item.maxCoefficient/1000000).toFixed(1)+"M</td>"
+            }else{
+              str += "<td>$"+(item.maxWinMoney/1000).toFixed(1)+"K</td>"
+            }
           }else{
             str += "<td>"+item.maxWinMoney+"$</td>"
           }
@@ -339,8 +347,11 @@
         return str
       })
       if(data.bankPlaysers > 1000){
-        let bp = data.bankPlaysers/1000
-        $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+bp.toFixed(1)+"K</b></span>")
+        if(item.bankPlaysers > 1000000){
+          $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+(data.bankPlaysers/1000000).toFixed(1)+"M</b></span>")
+        }else{
+          $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+(data.bankPlaysers/1000).toFixed(1)+"K</b></span>")
+        }
       }else{
         $('.statisticsBottom').html("<span style='float:left'>Всего пользователей:"+data.numPlayers+"</span><span style='float:right'>Банк: <b>"+data.bankPlaysers+"$</b></span>")
       }
