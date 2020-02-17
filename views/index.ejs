@@ -333,8 +333,8 @@
           }
           str += "<td>"+item.maxCoefficient+"x</td>"
           if(item.maxWinMoney > 1000){
-            if(item.maxCoefficient > 1000000){
-              str += "<td>$"+(item.maxCoefficient/1000000).toFixed(1)+"M</td>"
+            if(item.maxWinMoney > 1000000){
+              str += "<td>$"+(item.maxWinMoney/1000000).toFixed(1)+"M</td>"
             }else{
               str += "<td>$"+(item.maxWinMoney/1000).toFixed(1)+"K</td>"
             }
@@ -347,7 +347,7 @@
         return str
       })
       if(data.bankPlaysers > 1000){
-        if(item.bankPlaysers > 1000000){
+        if(data.bankPlaysers > 1000000){
           $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+(data.bankPlaysers/1000000).toFixed(1)+"M</b></span>")
         }else{
           $('.statisticsBottom').html("<span style='float:left'>Всего пользователей: <b>"+data.numPlayers+"</b></span><span style='float:right'>Банк: <b>$"+(data.bankPlaysers/1000).toFixed(1)+"K</b></span>")
