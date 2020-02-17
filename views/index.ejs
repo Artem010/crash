@@ -407,13 +407,40 @@
             bank +=Number(item.rate)
             str+="<tr>"
             str += "<td>"+item.name+"</td>"
-            str += "<td>"+item.rate+"$</td>"
+            if(item.rate > 1000){
+              if(item.rate > 1000000){
+                str += "<td>"+(item.rate/1000000).toFixed(1)+"$</td>"
+              }else{
+                str += "<td>"+(item.rate/1000).toFixed(1)+"$</td>"
+              }
+            }else{
+              str += "<td>"+item.rate+"$</td>"
+            }
             if(item.coefficient != ''){
               str += "<td>"+item.coefficient+"x</td>"
-              str += "<td>"+item.winMoney+"$</td>"
+
+              if(item.winMoney > 1000){
+                if(item.winMoney > 1000000){
+                  str += "<td>"+(item.winMoney/1000000).toFixed(1)+"$</td>"
+                }else{
+                  str += "<td>"+(item.winMoney/1000).toFixed(1)+"$</td>"
+                }
+              }else{
+                str += "<td>"+item.winMoney+"$</td>"
+              }
+
             }else{
               str += "<td>"+item.coefficient+"</td>"
-              str += "<td>"+item.winMoney+"</td>"
+
+              if(item.winMoney > 1000){
+                if(item.winMoney > 1000000){
+                  str += "<td>"+(item.winMoney/1000000).toFixed(1)+"$</td>"
+                }else{
+                  str += "<td>"+(item.winMoney/1000).toFixed(1)+"$</td>"
+                }
+              }else{
+                str += "<td>"+item.winMoney+"$</td>"
+              }
             }
             str+="</tr>"
           })
