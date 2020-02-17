@@ -431,16 +431,7 @@
 
             }else{
               str += "<td>"+item.coefficient+"</td>"
-
-              if(item.winMoney > 1000){
-                if(item.winMoney > 1000000){
-                  str += "<td>"+(item.winMoney/1000000).toFixed(1)+"$</td>"
-                }else{
-                  str += "<td>"+(item.winMoney/1000).toFixed(1)+"$</td>"
-                }
-              }else{
-                str += "<td>"+item.winMoney+"$</td>"
-              }
+              str += "<td>"+item.winMoney+"</td>"
             }
             str+="</tr>"
           })
